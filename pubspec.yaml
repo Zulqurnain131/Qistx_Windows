@@ -30,10 +30,29 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
+  supabase_flutter: ^2.16.0
+  uuid: ^4.5.1
+  flutter_image_compress: ^2.4.0 #image compress dependenci abdroid
+  image: ^4.5.4
+  # google_sign_in: ^7.2.0
+  google_sign_in: ^6.2.1
+  local_auth: ^2.3.0 #Enable fingerprint and Faceid
+  flutter_dotenv: ^6.0.0
+  crypto: ^3.0.3
+  app_links: ^6.0.1  # Windows deep linking catch karne ke liye
+  url_launcher:
+  shared_preferences: ^2.5.5
+  file_picker: ^10.3.2
+  #Open Street Map dependenci
+  flutter_map: ^8.2.1
+  latlong2: ^0.9.1
+  geolocator: ^14.0.2
+  flutter_map_dragmarker: ^8.0.0 #marker ko drag krny wali dependenci
 
 dev_dependencies:
   flutter_test:
@@ -58,9 +77,10 @@ flutter:
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
-  # assets:
-  #   - images/a_dot_burr.jpeg
-  #   - images/a_dot_ham.jpeg
+  assets:
+      - .env
+      - assets/Icons/
+      - assets/images/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
