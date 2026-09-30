@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qistx_app/View/auth_screens/auth_create_pin.dart';
+import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/auth_screens/pin_verification_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -147,7 +148,10 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
   }
 
   ////          OTP VERIFY ///
-  Future<bool> verifyOtp({required String email, required String otp}) async {
+  Future<String?> verifyOtp({
+    required String email,
+    required String otp,
+  }) async {
     try {
       // OTP Verify
       print("Verify OTP EMAIL:$email");
@@ -158,6 +162,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       );
 
       final user = _supabase.auth.currentUser;
+
       print("User ID = ${user?.id}");
 
       if (user == null) {
@@ -184,16 +189,17 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
         print("Insert Success");
       }
 
-      return true;
+      // IMPORTANT: User ID return
+      return user.id;
     } on AuthException catch (e) {
       debugPrint("Auth Error: ${e.message}");
       print("Message: ${e.message}");
       print("Status: ${e.statusCode}");
       print("Code: ${e.code}");
-      return false;
+      return null;
     } catch (e) {
       debugPrint("Error: $e");
-      return false;
+      return null;
     }
   }
 
@@ -226,12 +232,19 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
         backgroundColor: Colors.white,
         elevation: 0,
         toolbarHeight: isMobile ? 50 : 60,
-        leading: Navigator.canPop(context)
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back, color: Colors.black87),
-                onPressed: () => Navigator.pop(context),
-              )
-            : null,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.black87),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else {
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => const AuthScreen()),
+              );
+            }
+          },
+        ),
       ),
       body: SafeArea(
         child: isDesktop
@@ -569,11 +582,12 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
 
     debugPrint("OTP Code Entered: $code");
 
-    bool success = await verifyOtp(email: widget.email, otp: code);
+    final String? userId = await verifyOtp(email: widget.email, otp: code);
 
     if (!mounted) return;
 
-    if (success) {
+    if (userId != null) {
+      print("Verified User ID: $userId");
       final prefs = await SharedPreferences.getInstance();
 
       // OTP complete ho gayi
@@ -595,7 +609,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
         await prefs.setString("last_screen", "create_pin");
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (_) => const AuthCreatePin()),
+          MaterialPageRoute(builder: (_) => AuthCreatePin(userId: userId)),
         );
       }
     } else {

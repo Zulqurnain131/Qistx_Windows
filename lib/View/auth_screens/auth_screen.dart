@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
 import 'package:qistx_app/View/auth_screens/auth_confirmation_pin.dart';
 import 'package:qistx_app/View/auth_screens/auth_create_pin.dart';
 import 'package:qistx_app/View/auth_screens/pin_verification_screen.dart';
-import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -25,40 +23,52 @@ class _AuthScreenState extends State<AuthScreen> {
   bool _isLoading = false;
 
   @override
+  @override
   void initState() {
     super.initState();
 
     _authSubscription = supabase.auth.onAuthStateChange.listen((data) async {
+      final event = data.event;
       final session = data.session;
 
-      if (session != null) {
-        // State update safely to show loader while checking DB
-        if (mounted) setState(() => _isLoading = true);
+      // Sirf actual sign-in par react karo
+      if (event != AuthChangeEvent.signedIn || session == null || !mounted)
+        return;
 
-        final user = supabase.auth.currentUser;
-        if (user != null) {
-          final pinResponse = await supabase
-              .from("app_users")
-              .select("pin_hash")
-              .eq("id", user.id)
-              .single();
+      try {
+        setState(() => _isLoading = true);
 
-          final hasPin = pinResponse["pin_hash"] != null;
+        final user = session.user;
 
-          if (!mounted) return;
+        final pinResponse = await supabase
+            .from("app_users")
+            .select("pin_hash")
+            .eq("id", user.id)
+            .maybeSingle();
+
+        if (!mounted) return;
+
+        setState(() => _isLoading = false);
+
+        final hasPin = pinResponse?["pin_hash"] != null;
+
+        if (hasPin) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => const PinVerificationScreen()),
+          );
+        } else {
+          print("Pass User ID AUTHCREATE PIN");
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (_) => AuthCreatePin(userId: user.id)),
+          );
+        }
+      } catch (e) {
+        debugPrint("Auth state error: $e");
+
+        if (mounted) {
           setState(() => _isLoading = false);
-
-          if (hasPin) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const PinVerificationScreen()),
-            );
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const AuthCreatePin()),
-            );
-          }
         }
       }
     });
@@ -121,8 +131,13 @@ class _AuthScreenState extends State<AuthScreen> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString("last_screen", "otp");
       await prefs.setString("otp_email", email);
+      final expiry = DateTime.now()
+          .add(const Duration(seconds: 60))
+          .millisecondsSinceEpoch;
 
-      Navigator.push(
+      await prefs.setInt("otp_expiry", expiry);
+
+      Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => AuthConfirmationPin(email: email)),
       );

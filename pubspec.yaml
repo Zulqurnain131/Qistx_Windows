@@ -39,9 +39,10 @@ dependencies:
   uuid: ^4.5.1
   flutter_image_compress: ^2.4.0 #image compress dependenci abdroid
   image: ^4.5.4
+  provider: ^6.1.5
   # google_sign_in: ^7.2.0
   google_sign_in: ^6.2.1
-  local_auth: ^2.3.0 #Enable fingerprint and Faceid
+  local_auth: 3.0.2 #Enable fingerprint and Faceid
   flutter_dotenv: ^6.0.0
   crypto: ^3.0.3
   app_links: ^6.0.1  # Windows deep linking catch karne ke liye
@@ -53,6 +54,7 @@ dependencies:
   latlong2: ^0.9.1
   geolocator: ^14.0.2
   flutter_map_dragmarker: ^8.0.0 #marker ko drag krny wali dependenci
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

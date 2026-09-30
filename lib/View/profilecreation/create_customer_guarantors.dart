@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -10,7 +9,6 @@ import 'package:image/image.dart' as img;
 import 'package:latlong2/latlong.dart';
 import 'package:qistx_app/Models/guarantermodel.dart';
 import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class CreateCustomerGuarantors extends StatefulWidget {
   const CreateCustomerGuarantors({super.key});
@@ -31,73 +29,139 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
   bool backCnicError = false;
   Uint8List? _selectedImageBytes; // Web Support
   File? _selectedImageFile;
-  //// Map Variables
 
+  //// Map Variables
   final MapController mapController = MapController();
   final GuarantorModel customergurantor = GuarantorModel();
   final nameController = TextEditingController();
-
   final cnicController = TextEditingController();
-
   final whatsappController = TextEditingController();
-
   final emailController = TextEditingController();
-
   final addressController = TextEditingController();
 
-  LatLng selectedLocation = const LatLng(0, 0);
+  LatLng selectedLocation = const LatLng(
+    33.6844,
+    73.0479,
+  ); // Default to Islamabad
   bool isLoadingLocation = true;
 
   @override
   void initState() {
     super.initState();
-
     _getCurrentLocation();
   }
 
-  ////////// User se Current location fetch krny ka function ///
+  ////////// User se Current location fetch krny ka function - FIXED ///
   Future<void> _getCurrentLocation() async {
     try {
+      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
       if (!serviceEnabled) {
-        debugPrint("Location Service Off");
+        debugPrint("❌ Location Service Off");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Please enable location services"),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() {
+          isLoadingLocation = false;
+          // Use default location
+          selectedLocation = const LatLng(33.6844, 73.0479);
+          customergurantor.latitude = 33.6844;
+          customergurantor.longitude = 73.0479;
+        });
         return;
       }
 
+      // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
-
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          debugPrint("❌ Permission Denied");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Location permission denied"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          setState(() {
+            isLoadingLocation = false;
+            selectedLocation = const LatLng(33.6844, 73.0479);
+            customergurantor.latitude = 33.6844;
+            customergurantor.longitude = 73.0479;
+          });
+          return;
+        }
       }
 
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        debugPrint("Permission Denied");
+      if (permission == LocationPermission.deniedForever) {
+        debugPrint("❌ Permission Denied Forever");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Location permission permanently denied"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        setState(() {
+          isLoadingLocation = false;
+          selectedLocation = const LatLng(33.6844, 73.0479);
+          customergurantor.latitude = 33.6844;
+          customergurantor.longitude = 73.0479;
+        });
         return;
       }
 
+      // Get current position with timeout
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
       );
-
-      selectedLocation = LatLng(position.latitude, position.longitude);
-      customergurantor.latitude = position.latitude;
-
-      customergurantor.longitude = position.longitude;
-      print(
-        "Current Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
-      );
-
-      mapController.move(selectedLocation, 16);
 
       setState(() {
+        selectedLocation = LatLng(position.latitude, position.longitude);
+        customergurantor.latitude = position.latitude;
+        customergurantor.longitude = position.longitude;
         isLoadingLocation = false;
+
+        // Move map to current location
+        mapController.move(selectedLocation, 16);
       });
+
+      debugPrint(
+        "✅ Current Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
+      );
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ Error getting location: $e");
+      setState(() {
+        isLoadingLocation = false;
+        // Set default location on error
+        selectedLocation = const LatLng(33.6844, 73.0479);
+        customergurantor.latitude = 33.6844;
+        customergurantor.longitude = 73.0479;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error getting location: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
+
+  // ==================================================================
+  // REST OF YOUR CODE (unchanged except _buildMapWidget and _buildMobileLayout)
+  // ==================================================================
 
   Future<void> pickDocument(bool isFront) async {
     FilePickerResult? result = await FilePicker.platform.pickFiles(
@@ -146,7 +210,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     }
 
     img.Image? image = img.decodeImage(bytes);
-
     if (image == null) return null;
 
     if (image.width > 1280) {
@@ -160,7 +223,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
       compressedBytes = Uint8List.fromList(
         img.encodeJpg(image, quality: quality),
       );
-
       quality -= 5;
     } while (compressedBytes.lengthInBytes > 300 * 1024 && quality >= 10);
 
@@ -248,14 +310,146 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     if (!_validateDocuments()) {
       return;
     }
+
+    // Ensure location is set
+    if (customergurantor.latitude == 0 && customergurantor.longitude == 0) {
+      customergurantor.latitude = selectedLocation.latitude;
+      customergurantor.longitude = selectedLocation.longitude;
+    }
+
     customergurantor.fullName = nameController.text;
     customergurantor.cnicNo = cnicController.text;
     customergurantor.whatsappNo = whatsappController.text;
     customergurantor.email = emailController.text;
     customergurantor.address = addressController.text;
 
+    debugPrint(
+      "📍 Guarantor Location - Lat: ${customergurantor.latitude}, Lng: ${customergurantor.longitude}",
+    );
+
     Navigator.pop(context, customergurantor);
   }
+
+  // ==================================================================
+  // FIXED MAP WIDGET - Increased height and better rendering
+  // ==================================================================
+  Widget _buildMapWidget() {
+    return Container(
+      width: double.infinity,
+      height: 220, // Increased from 180 for better visibility
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: primaryOrange, width: 1.2),
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: FlutterMap(
+          mapController: mapController,
+          options: MapOptions(
+            initialCenter: selectedLocation,
+            initialZoom: 16,
+            onTap: (tapPosition, point) {
+              setState(() {
+                selectedLocation = point;
+                customergurantor.latitude = point.latitude;
+                customergurantor.longitude = point.longitude;
+              });
+              debugPrint(
+                "📍 Map tapped: ${point.latitude}, ${point.longitude}",
+              );
+            },
+          ),
+          children: [
+            TileLayer(
+              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+              userAgentPackageName: "com.qistx.app",
+            ),
+            DragMarkers(
+              markers: [
+                DragMarker(
+                  point: selectedLocation,
+                  size: const Size(45, 45),
+                  builder: (context, position, isDragging) {
+                    return const Icon(
+                      Icons.location_pin,
+                      color: Colors.blue,
+                      size: 45,
+                    );
+                  },
+                  onDragEnd: (details, point) {
+                    setState(() {
+                      selectedLocation = point;
+                      customergurantor.latitude = point.latitude;
+                      customergurantor.longitude = point.longitude;
+                    });
+                    debugPrint(
+                      "📍 Dragged to: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
+                    );
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ==================================================================
+  // FIXED MOBILE LAYOUT - Shows loading indicator
+  // ==================================================================
+  Widget _buildMobileLayout() {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildTitleBlock(),
+          const SizedBox(height: 24),
+          _buildSectionHeader("Personal Information"),
+          const SizedBox(height: 20),
+          _buildPhotoPicker(),
+          const SizedBox(height: 24),
+          _buildTextFields(),
+          const SizedBox(height: 10),
+          _buildOptionalLabel(),
+          const SizedBox(height: 10),
+          // Show loading indicator while getting location
+          isLoadingLocation
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 10),
+                        Text("Getting location..."),
+                      ],
+                    ),
+                  ),
+                )
+              : _buildMapWidget(),
+          const SizedBox(height: 32),
+          _buildSectionHeader("Identity Documents"),
+          const SizedBox(height: 16),
+          _buildDocumentUploadRow(Icons.badge_outlined, "Front CNIC", true),
+          const SizedBox(height: 16),
+          _buildDocumentUploadRow(
+            Icons.credit_card_outlined,
+            "Back CNIC",
+            false,
+          ),
+          const SizedBox(height: 28),
+          _buildActionButton(width: double.infinity),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  // ==================================================================
+  // REST OF YOUR UI BUILDERS (unchanged)
+  // ==================================================================
 
   @override
   Widget build(BuildContext context) {
@@ -292,7 +486,7 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
                     ),
                   ),
 
-                // Top Left Brand Logo (QISTX Header Logo) - desktop only, hidden on mobile/tablet
+                // Top Left Brand Logo (QISTX Header Logo) - desktop only
                 if (isDesktop && !isShortScreen && constraints.maxWidth > 350)
                   Positioned(
                     top: 20,
@@ -334,8 +528,7 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Inline Logo for Very Short Devices (desktop only —
-                              // mobile/tablet never shows the QistX icon)
+                              // Inline Logo for Very Short Devices
                               if (isDesktop &&
                                   (isShortScreen ||
                                       constraints.maxWidth <= 350)) ...[
@@ -353,8 +546,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
                                 const SizedBox(height: 20),
                               ],
 
-                              // Desktop = existing two column layout (unchanged)
-                              // Mobile/Tablet = single column, screenshot order
                               isDesktop
                                   ? _buildDesktopLayout()
                                   : _buildMobileLayout(),
@@ -373,9 +564,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     );
   }
 
-  // ==================================================================
-  // DESKTOP LAYOUT (unchanged behaviour, two columns side by side)
-  // ==================================================================
   Widget _buildDesktopLayout() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 40),
@@ -445,47 +633,7 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
   }
 
   // ==================================================================
-  // MOBILE / TABLET LAYOUT
-  // Title -> Personal Info (photo + fields) -> Map -> Identity Docs ->
-  // ADD button. Everything scrolls together.
-  // ==================================================================
-  Widget _buildMobileLayout() {
-    return Form(
-      key: _formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildTitleBlock(),
-          const SizedBox(height: 24),
-          _buildSectionHeader("Personal Information"),
-          const SizedBox(height: 20),
-          _buildPhotoPicker(),
-          const SizedBox(height: 24),
-          _buildTextFields(),
-          const SizedBox(height: 10),
-          _buildOptionalLabel(),
-          const SizedBox(height: 10),
-          _buildMapWidget(),
-          const SizedBox(height: 32),
-          _buildSectionHeader("Identity Documents"),
-          const SizedBox(height: 16),
-          _buildDocumentUploadRow(Icons.badge_outlined, "Front CNIC", true),
-          const SizedBox(height: 16),
-          _buildDocumentUploadRow(
-            Icons.credit_card_outlined,
-            "Back CNIC",
-            false,
-          ),
-          const SizedBox(height: 28),
-          _buildActionButton(width: double.infinity),
-          const SizedBox(height: 20),
-        ],
-      ),
-    );
-  }
-
-  // ==================================================================
-  // SHARED PIECES (used by both desktop and mobile layouts)
+  // SHARED PIECES (unchanged)
   // ==================================================================
 
   Widget _buildTitleBlock() {
@@ -547,12 +695,10 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
             height: 85,
             child: Stack(
               children: [
-                // Outer Orange Dashed Circle
                 CustomPaint(
                   size: const Size(85, 85),
                   painter: DashedCirclePainter(),
                 ),
-                // Avatar Image / Placeholder
                 Center(
                   child: CircleAvatar(
                     radius: 36,
@@ -640,65 +786,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     );
   }
 
-  Widget _buildMapWidget() {
-    return Container(
-      width: double.infinity,
-      height: 180,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: primaryOrange, width: 1.2),
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(12),
-        child: FlutterMap(
-          mapController: mapController,
-          options: MapOptions(
-            initialCenter: selectedLocation,
-            initialZoom: 16,
-            onTap: (tapPosition, point) {
-              setState(() {
-                selectedLocation = point;
-                customergurantor.latitude = point.latitude;
-                customergurantor.longitude = point.longitude;
-              });
-            },
-          ),
-          children: [
-            TileLayer(
-              urlTemplate: "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-              userAgentPackageName: "com.qistx.app",
-            ),
-            DragMarkers(
-              markers: [
-                DragMarker(
-                  point: selectedLocation,
-                  size: const Size(45, 45),
-                  builder: (context, position, isDragging) {
-                    return const Icon(
-                      Icons.location_pin,
-                      color: Colors.blue,
-                      size: 45,
-                    );
-                  },
-                  onDragEnd: (details, point) {
-                    setState(() {
-                      selectedLocation = point;
-                      customergurantor.latitude = point.latitude;
-                      customergurantor.longitude = point.longitude;
-                    });
-
-                    debugPrint("Lat : ${selectedLocation.latitude}");
-                    debugPrint("Lng : ${selectedLocation.longitude}");
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   Widget _buildActionButton({required double width}) {
     return SizedBox(
       width: width,
@@ -728,7 +815,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     );
   }
 
-  // Helper method for Document Upload Buttons (Front/Back CNIC)
   Widget _buildDocumentUploadRow(
     IconData icon,
     String buttonText,
@@ -794,7 +880,6 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     );
   }
 
-  // Helper method for Right Panel TextFields
   Widget _buildTextField(
     String hint,
     IconData icon, {
@@ -806,12 +891,10 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
       validator: (value) {
         value = value?.trim() ?? "";
 
-        // Required
         if (value.isEmpty) {
           return "$hint is required";
         }
 
-        // Name
         if (hint == "Name") {
           if (value.length < 3) {
             return "Name must be at least 3 characters";
@@ -821,28 +904,24 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
           }
         }
 
-        // CNIC
         if (hint == "CNIC No.") {
           if (!RegExp(r'^\d{5}-\d{7}-\d{1}$').hasMatch(value)) {
             return "Format: 12345-1234567-1";
           }
         }
 
-        // WhatsApp
         if (hint == "WhatsApp No.") {
           if (!RegExp(r'^03\d{9}$').hasMatch(value)) {
             return "Enter valid Pakistani number";
           }
         }
 
-        // Email
         if (hint == "Email") {
           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
             return "Enter valid email";
           }
         }
 
-        // Address
         if (hint == "Address") {
           if (value.length < 10) {
             return "Address is too short";

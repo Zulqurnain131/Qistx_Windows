@@ -171,7 +171,7 @@ class _CreateAccountState extends State<CreateAccount> {
       _uploadedImageUrl = await _uploadImageToSupabase(user.id);
       debugPrint("Uploaded URL: $_uploadedImageUrl");
       await _supabase.auth.updateUser(
-        UserAttributes(data: {"full_name": _fullNameController.text.trim()}),
+        UserAttributes(data: {'full_name': _fullNameController.text.trim()}),
       );
       await _supabase
           .from("app_users")
@@ -183,10 +183,10 @@ class _CreateAccountState extends State<CreateAccount> {
           .eq("id", user.id);
 
       if (!mounted) return;
-
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile updated successfully!")),
       );
+      if (!mounted) return;
 
       Navigator.pushReplacement(
         context,

@@ -1,11 +1,17 @@
+import 'dart:io';
 import 'dart:typed_data';
 import 'dart:ui';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:image/image.dart' as img;
+import 'package:qistx_app/Models/ledger_entry_model.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddLedger extends StatefulWidget {
-  const AddLedger({super.key});
+  final String? accountid;
+  const AddLedger({super.key, this.accountid});
 
   @override
   State<AddLedger> createState() => _AddLedgerState();
@@ -16,29 +22,38 @@ class _AddLedgerState extends State<AddLedger> {
 
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
+  final LedgerEntryModel _ledgerEntryModel = LedgerEntryModel();
+  String? _selectedPaymentMethod = "cash";
 
-  String? _selectedPaymentMethod = "Payment Method";
-
-  // Receipt file state. `_receiptFilePath` is populated on mobile/desktop
-  // (real file system path); `_receiptFileBytes` is populated on Flutter
-  // Web (no direct file system access there). Only one of the two will
-  // be non-null depending on platform, but `_receiptFileName` is always
-  // set once a file is picked.
-  String? _receiptFileName;
-  String? _receiptFilePath;
-  Uint8List? _receiptFileBytes;
+  Uint8List? _selectedImageBytes;
+  String? _selectedImageName;
 
   bool _isLoading = false;
-  bool _isPickingReceipt = false;
+  bool isPickingImage = false;
 
   final List<String> _paymentMethodOptions = [
-    "Payment Method",
-    "Cash",
-    "Bank Transfer",
-    "Cheque",
-    "Card",
-    "Mobile Wallet",
+    "cash",
+    "easypaisa",
+    "jazzcash",
+    "nayapay",
+    "bank_transfer",
+    "sadapay",
+    "card",
   ];
+  @override
+  void initState() {
+    super.initState();
+    // _saveCurrentScreen();
+  }
+
+  // Future<void> _saveCurrentScreen() async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.setString("last_screen", "AddLedger");
+  //   } catch (e) {
+  //     debugPrint("SharedPreferences Error: $e");
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -47,66 +62,180 @@ class _AddLedgerState extends State<AddLedger> {
     super.dispose();
   }
 
-  /// Opens the native file/photo picker. Works on mobile (Android/iOS),
-  /// desktop (Windows/macOS/Linux), and web — `file_picker` uses the
-  /// right native picker for whichever platform the app is running on.
-  Future<void> _pickReceiptPhoto() async {
-    if (_isPickingReceipt) return;
-    setState(() => _isPickingReceipt = true);
+  /// image compress function
+  Future<Uint8List?> compressTo300KB(Uint8List bytes) async {
+    const int maxSize = 300 * 1024;
+
+    // Agar already 300 KB se kam hai
+    if (bytes.lengthInBytes <= maxSize) {
+      return bytes;
+    }
+
+    img.Image? image = img.decodeImage(bytes);
+
+    if (image == null) {
+      return null;
+    }
+
+    // Large image ko resize karein
+    if (image.width > 1280) {
+      image = img.copyResize(image, width: 1280);
+    }
+
+    int quality = 90;
+
+    Uint8List compressedBytes = Uint8List.fromList(
+      img.encodeJpg(image, quality: quality),
+    );
+
+    while (compressedBytes.lengthInBytes > maxSize && quality > 10) {
+      quality -= 5;
+
+      compressedBytes = Uint8List.fromList(
+        img.encodeJpg(image, quality: quality),
+      );
+    }
+
+    return compressedBytes;
+  }
+
+  Future<void> pickImage() async {
+    if (isPickingImage) return;
+
+    setState(() {
+      isPickingImage = true;
+    });
 
     try {
       final FilePickerResult? result = await FilePicker.platform.pickFiles(
         type: FileType.image,
-        withData: true, // ensures bytes are available on web
+        allowMultiple: false,
+        withData: true,
       );
 
-      if (result == null || result.files.isEmpty) return; // user cancelled
+      if (result == null || result.files.isEmpty) {
+        return;
+      }
 
-      final PlatformFile file = result.files.single;
+      final PlatformFile file = result.files.first;
+
+      Uint8List? originalBytes;
+
+      // Web / Desktop
+      if (file.bytes != null) {
+        originalBytes = file.bytes;
+      }
+      // Mobile fallback
+      else if (file.path != null) {
+        originalBytes = await File(file.path!).readAsBytes();
+      }
+
+      if (originalBytes == null) {
+        return;
+      }
+
+      debugPrint(
+        "Original image: "
+        "${(originalBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
+      );
+
+      final Uint8List? compressedBytes = await compressTo300KB(originalBytes);
+
+      if (compressedBytes == null) {
+        throw Exception("Image compression failed");
+      }
+
+      debugPrint(
+        "Final image: "
+        "${(compressedBytes.lengthInBytes / 1024).toStringAsFixed(2)} KB",
+      );
 
       setState(() {
-        _receiptFileName = file.name;
-        _receiptFilePath = file.path; // null on web
-        _receiptFileBytes = file.bytes; // populated on web (and if withData)
+        _selectedImageBytes = compressedBytes;
+        _selectedImageName = file.name;
       });
     } catch (e) {
-      debugPrint("Receipt pick error: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Could not select receipt photo.\n$e")),
-        );
-      }
+      debugPrint("Image picking error: $e");
     } finally {
-      if (mounted) setState(() => _isPickingReceipt = false);
+      if (mounted) {
+        setState(() {
+          isPickingImage = false;
+        });
+      }
     }
   }
 
   Future<void> _addLedgerEntry() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
 
-    setState(() => _isLoading = true);
+    if (_selectedPaymentMethod == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select payment method.")),
+      );
+
+      return;
+    }
+
+    final double? amount = double.tryParse(_amountController.text.trim());
+
+    if (amount == null || amount <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please enter a valid amount.")),
+      );
+
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
 
     try {
-      // Yahan apna ledger entry insert/upload logic likh sakte hain.
-      // Receipt file `_receiptFilePath` (mobile/desktop) ya
-      // `_receiptFileBytes` (web) se upload kar sakte hain.
-      await Future.delayed(const Duration(seconds: 1)); // Mock network call
+      final String ledgerid = await _ledgerEntryModel.saveLedgerEntry(
+        accountId: widget.accountid!,
+
+        // IMPORTANT:
+        // Ledger screen se payment jayega
+        entryType: "payment",
+
+        paymentMethod: _selectedPaymentMethod!,
+
+        amount: amount,
+
+        remarks: _remarksController.text.trim().isEmpty
+            ? null
+            : _remarksController.text.trim(),
+
+        receiptBytes: _selectedImageBytes,
+
+        receiptFileName: _selectedImageName,
+      );
 
       if (!mounted) return;
 
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Ledger entry added successfully.")),
+        const SnackBar(content: Text("Payment added successfully.")),
+      );
+      print('Ledgerid$ledgerid');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
       debugPrint("Add Ledger Error: $e");
-      if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text("Failed to add entry.\n$e")));
-      }
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text("Failed to add payment.\n$e")));
     } finally {
       if (mounted) {
-        setState(() => _isLoading = false);
+        setState(() {
+          _isLoading = false;
+        });
       }
     }
   }
@@ -118,6 +247,7 @@ class _AddLedgerState extends State<AddLedger> {
     final bool isDesktop = screenWidth > 800;
 
     return Scaffold(
+      appBar: AppBar(backgroundColor: Colors.white),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
@@ -323,11 +453,11 @@ class _AddLedgerState extends State<AddLedger> {
 
   /// Dashed-border "Receipt Photo" upload box.
   Widget _buildReceiptUploadBox() {
-    final bool hasReceipt = _receiptFileName != null;
+    final bool hasReceipt = _selectedImageBytes != null;
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: _pickReceiptPhoto,
+      onTap: pickImage,
       child: CustomPaint(
         painter: _DashedBorderPainter(
           color: hasReceipt ? Colors.green : Colors.grey.shade400,
@@ -344,11 +474,11 @@ class _AddLedgerState extends State<AddLedger> {
                   color: Colors.grey.shade200,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: hasReceipt && _receiptFileBytes != null
+                child: _selectedImageBytes != null
                     ? ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: Image.memory(
-                          _receiptFileBytes!,
+                          _selectedImageBytes!,
                           fit: BoxFit.cover,
                         ),
                       )
@@ -373,9 +503,11 @@ class _AddLedgerState extends State<AddLedger> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      _isPickingReceipt
+                      isPickingImage
                           ? "Opening picker..."
-                          : (hasReceipt ? _receiptFileName! : "Tap to Upload"),
+                          : (hasReceipt
+                                ? _selectedImageName!
+                                : "Tap to Upload"),
                       style: TextStyle(
                         fontSize: 11.5,
                         color: Colors.black54,
@@ -388,7 +520,7 @@ class _AddLedgerState extends State<AddLedger> {
                 ),
               ),
               const SizedBox(width: 8),
-              if (_isPickingReceipt)
+              if (isPickingImage)
                 const SizedBox(
                   height: 18,
                   width: 18,
@@ -478,6 +610,8 @@ class _AddLedgerState extends State<AddLedger> {
     return DropdownButtonFormField<String>(
       value: value,
       isExpanded: true,
+      dropdownColor: Colors.white,
+
       style: const TextStyle(fontSize: 14, color: Colors.black87),
       icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black87),
       decoration: InputDecoration(

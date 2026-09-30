@@ -4,6 +4,10 @@ import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:qistx_app/Controllers/biometric_service.dart';
+import 'package:qistx_app/View/products/add_Ledger.dart';
+import 'package:qistx_app/View/products/add_new_product.dart';
+import 'package:qistx_app/View/products/customer_khata.dart';
+import 'package:qistx_app/View/profilecreation/create_shop_profile.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -445,7 +449,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
     if (success) {
       debugPrint("PIN Verified Successfully");
       final prefs = await SharedPreferences.getInstance();
-      await prefs.remove("current_screen");
+      await prefs.remove("last_screen");
 
       // Home Screen par bhej dein
       Navigator.pushReplacement(

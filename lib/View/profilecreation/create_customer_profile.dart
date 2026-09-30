@@ -11,9 +11,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:qistx_app/Models/customer_model.dart';
 import 'package:qistx_app/Models/guarantermodel.dart';
 import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
+import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_guarantors.dart';
-import 'package:qistx_app/View/users_screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:qistx_app/View/profilecreation/view_customer.dart';
 
 class CreateCustomerProfile extends StatefulWidget {
   const CreateCustomerProfile({super.key});
@@ -55,61 +55,126 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
   @override
   void initState() {
     super.initState();
-    _saveCurrentScreen(); // Calling the function when screen loads
+    // _saveCurrentScreen(); // Calling the function when screen loads
     _getCurrentLocation();
   }
 
   // Function to save the last screen
-  Future<void> _saveCurrentScreen() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("last_screen", "create_customer_profile");
-    } catch (e) {
-      debugPrint("SharedPreferences Error: $e");
-    }
-  }
+  // Future<void> _saveCurrentScreen() async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.setString("last_screen", "create_customer_profile");
+  //   } catch (e) {
+  //     debugPrint("SharedPreferences Error: $e");
+  //   }
+  // }
 
   /// User se Current location fetch krny ka function
   Future<void> _getCurrentLocation() async {
     try {
+      // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
-
       if (!serviceEnabled) {
-        debugPrint("Location Service Off");
+        debugPrint("❌ Location Service Off");
+        // Show dialog to enable location
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Please enable location services"),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        setState(() {
+          isLoadingLocation = false;
+          // Set default location (e.g., Islamabad)
+          selectedLocation = const LatLng(33.6844, 73.0479);
+          customer.latitude = 33.6844;
+          customer.longitude = 73.0479;
+        });
         return;
       }
 
+      // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
-
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          debugPrint("❌ Permission Denied");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Location permission denied"),
+                backgroundColor: Colors.red,
+              ),
+            );
+          }
+          setState(() {
+            isLoadingLocation = false;
+            selectedLocation = const LatLng(33.6844, 73.0479);
+            customer.latitude = 33.6844;
+            customer.longitude = 73.0479;
+          });
+          return;
+        }
       }
 
-      if (permission == LocationPermission.denied ||
-          permission == LocationPermission.deniedForever) {
-        debugPrint("Permission Denied");
+      if (permission == LocationPermission.deniedForever) {
+        debugPrint("❌ Permission Denied Forever");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Location permission permanently denied"),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        setState(() {
+          isLoadingLocation = false;
+          selectedLocation = const LatLng(33.6844, 73.0479);
+          customer.latitude = 33.6844;
+          customer.longitude = 73.0479;
+        });
         return;
       }
 
+      // Get current position
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
+        timeLimit: const Duration(seconds: 10),
       );
-
-      selectedLocation = LatLng(position.latitude, position.longitude);
-      customer.latitude = position.latitude;
-
-      customer.longitude = position.longitude;
-      print(
-        "Current Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
-      );
-
-      mapController.move(selectedLocation, 16);
 
       setState(() {
+        selectedLocation = LatLng(position.latitude, position.longitude);
+        customer.latitude = position.latitude;
+        customer.longitude = position.longitude;
         isLoadingLocation = false;
+
+        // Move map to current location
+        mapController.move(selectedLocation, 16);
       });
+
+      debugPrint(
+        "✅ Current Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
+      );
     } catch (e) {
-      debugPrint(e.toString());
+      debugPrint("❌ Error getting location: $e");
+      setState(() {
+        isLoadingLocation = false;
+        // Set default location on error
+        selectedLocation = const LatLng(33.6844, 73.0479);
+        customer.latitude = 33.6844;
+        customer.longitude = 73.0479;
+      });
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Error getting location: $e"),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -286,31 +351,98 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
     if (!_validateDocuments()) {
       return;
     }
+
+    // Debug location data
+    debugPrint(
+      "📍 Final Location - Lat: ${customer.latitude}, Lng: ${customer.longitude}",
+    );
+
     try {
       customer.fullName = nameController.text;
-
       customer.cnicNo = cnicController.text;
-
       customer.whatsappNo = whatsappController.text;
-
       customer.email = emailController.text;
-
       customer.address = addressController.text;
-      await customer.saveCustomer();
+
+      // Ensure location is set
+      if (customer.latitude == 0 && customer.longitude == 0) {
+        customer.latitude = selectedLocation.latitude;
+        customer.longitude = selectedLocation.longitude;
+      }
+
+      final customerId = await customer.saveCustomer();
+      print("✅ Created Customer ID: $customerId");
+
       if (!mounted) return;
 
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(const SnackBar(content: Text("Customer Saved")));
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
+      _showProfileCreatedDialog(customerId);
     } catch (e) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.toString())));
     }
+  }
+
+  void _showProfileCreatedDialog(final customerId) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          title: const Text(
+            "Profile Created Successfully",
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            "Would you like to open khata account for this customer now?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(dialogContext); // close dialog only
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => ViewCustomer()),
+                );
+              },
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: Colors.grey.shade700),
+              ),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryOrange,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                elevation: 0,
+              ),
+              onPressed: () {
+                Navigator.pop(dialogContext); // close dialog
+                // TODO: yahan apna Open Khata Account screen navigate karein
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => CustomerKhata(customerId: customerId),
+                  ),
+                );
+              },
+              child: const Text(
+                "Open Khata",
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -535,7 +667,21 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
           const SizedBox(height: 10),
           _buildOptionalLabel(),
           const SizedBox(height: 10),
-          _buildMapWidget(),
+          // Show loading indicator while getting location
+          isLoadingLocation
+              ? const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: Center(
+                    child: Column(
+                      children: [
+                        CircularProgressIndicator(),
+                        SizedBox(height: 10),
+                        Text("Getting your location..."),
+                      ],
+                    ),
+                  ),
+                )
+              : _buildMapWidget(),
           const SizedBox(height: 32),
           _buildSectionHeader("Identity Documents"),
           const SizedBox(height: 16),
@@ -725,7 +871,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
   Widget _buildMapWidget() {
     return Container(
       width: double.infinity,
-      height: 180,
+      height: 220, // Increased height for better visibility
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: primaryOrange, width: 1.2),
@@ -743,6 +889,9 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
                 customer.latitude = point.latitude;
                 customer.longitude = point.longitude;
               });
+              debugPrint(
+                "📍 Map tapped: ${point.latitude}, ${point.longitude}",
+              );
             },
           ),
           children: [
@@ -768,9 +917,9 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
                       customer.latitude = point.latitude;
                       customer.longitude = point.longitude;
                     });
-
-                    debugPrint("Lat : ${selectedLocation.latitude}");
-                    debugPrint("Lng : ${selectedLocation.longitude}");
+                    debugPrint(
+                      "📍 Dragged to: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
+                    );
                   },
                 ),
               ],

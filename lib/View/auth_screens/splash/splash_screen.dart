@@ -3,7 +3,9 @@ import 'package:qistx_app/View/auth_screens/auth_confirmation_pin.dart';
 import 'package:qistx_app/View/auth_screens/auth_create_pin.dart';
 import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/auth_screens/pin_verification_screen.dart';
+import 'package:qistx_app/View/products/add_Ledger.dart';
 import 'package:qistx_app/View/products/add_new_product.dart';
+import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/profilecreation/create_account.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
 import 'package:qistx_app/View/profilecreation/create_shop_profile.dart';
@@ -94,12 +96,12 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(builder: (_) => const CreateShopProfile()),
         );
         return;
-      case "create_customer_profile":
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const CreateCustomerProfile()),
-        );
-        return;
+      // case "create_customer_profile":
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const CreateCustomerProfile()),
+      //   );
+      //   return;
 
       case "pin_verification":
         Navigator.pushReplacement(
@@ -107,12 +109,25 @@ class _SplashScreenState extends State<SplashScreen> {
           MaterialPageRoute(builder: (_) => const PinVerificationScreen()),
         );
         return;
-      case "add_new_product":
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const AddNewProduct()),
-        );
-        return;
+      // case "add_new_product":
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const AddNewProduct()),
+      //   );
+      //   return;
+      // case "customer-khata":
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const CustomerKhata()),
+      //   );
+      //   return;
+
+      // case "AddLedger":
+      //   Navigator.pushReplacement(
+      //     context,
+      //     MaterialPageRoute(builder: (_) => const AddLedger()),
+      //   );
+      //   return;
 
       case "home":
         Navigator.pushReplacement(

@@ -22,7 +22,7 @@ class CustomerModel {
   final supabase = Supabase.instance.client;
   final uuid = const Uuid();
 
-  Future<void> saveCustomer() async {
+  Future<String> saveCustomer() async {
     final user = supabase.auth.currentUser;
 
     if (user == null) {
@@ -127,6 +127,7 @@ class CustomerModel {
       });
 
       customerInserted = true;
+      print("Customer inserted successfully: $customerId");
 
       // ---------------- Save Guarantors ----------------
       for (final g in guarantors) {
@@ -218,6 +219,8 @@ class CustomerModel {
           "is_active": true,
         });
       }
+      print("Customer inserted successfully: $customerId");
+      return customerId;
     } catch (e) {
       print("KYC Failed: ${e.toString()}");
 

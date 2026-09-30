@@ -1,13 +1,43 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:app_links/app_links.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:qistx_app/View/auth_screens/pin_verification_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:qistx_app/Providers/CustomerProvider%20.dart';
+import 'package:qistx_app/Providers/ProductStockProvider.dart';
+import 'package:qistx_app/Providers/home_provider.dart';
+import 'package:qistx_app/View/auth_screens/splash/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:window_manager/window_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // 💻 Sirf Desktop platforms par Window Manager initialize hoga
+  if (!kIsWeb && (Platform.isWindows || Platform.isLinux || Platform.isMacOS)) {
+    await windowManager.ensureInitialized();
+
+    const double targetWidth = 1480;
+    const double targetHeight = 900;
+
+    WindowOptions windowOptions = const WindowOptions(
+      size: Size(targetWidth, targetHeight),
+      minimumSize: Size(targetWidth, targetHeight),
+      center: false,
+      title: 'qistx_app',
+    );
+
+    windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.setMinimumSize(const Size(targetWidth, targetHeight));
+      await windowManager.show();
+      await windowManager.maximize();
+      await windowManager.focus();
+    });
+  }
+
   debugPrint("MAIN: Flutter initialized");
   await dotenv.load(fileName: ".env");
   debugPrint("MAIN: dotenv loaded");
@@ -16,12 +46,23 @@ Future<void> main() async {
     url: dotenv.env['SUPABASE_URL']!,
     publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
     authOptions: const FlutterAuthClientOptions(
-      authFlowType: AuthFlowType.pkce, // Recommended for Windows Desktop
+      authFlowType: AuthFlowType.pkce,
     ),
   );
   debugPrint("MAIN: Supabase initialized");
 
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => HomeProvider()),
+        ChangeNotifierProvider(create: (_) => ProductStockProvider()),
+        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+      ],
+      child: const MyApp(),
+    ),
+  );
+
+  // const MyApp());
   debugPrint("MAIN: runApp called");
 }
 
@@ -109,7 +150,7 @@ class _MyAppState extends State<MyApp> {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
-      home: const PinVerificationScreen(),
+      home: const SplashScreen(),
     );
   }
 }

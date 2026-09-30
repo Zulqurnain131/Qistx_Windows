@@ -8,7 +8,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AuthCreatePin extends StatefulWidget {
-  const AuthCreatePin({super.key});
+  final String? userId;
+  const AuthCreatePin({super.key, this.userId});
 
   @override
   State<AuthCreatePin> createState() => _AuthCreatePinState();
@@ -443,8 +444,8 @@ class _AuthCreatePinState extends State<AuthCreatePin> {
         );
 
         if (success) {
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString("last_screen", "home");
+          // final prefs = await SharedPreferences.getInstance();
+          // await prefs.setString("last_screen", "home");
           _clearPinFields();
           if (!mounted) return;
           Navigator.pushReplacement(

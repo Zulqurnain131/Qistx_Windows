@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:qistx_app/Models/customeraccountModel%20.dart';
+import 'package:qistx_app/View/products/add_Ledger.dart';
+import 'package:qistx_app/View/profilecreation/view_customer.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CustomerKhata extends StatefulWidget {
-  const CustomerKhata({super.key});
+  final String? customerId;
+  const CustomerKhata({super.key, this.customerId});
 
   @override
   State<CustomerKhata> createState() => _CreateCustomerProfileState();
@@ -12,36 +17,34 @@ class CustomerKhata extends StatefulWidget {
 class _CreateCustomerProfileState extends State<CustomerKhata> {
   final SupabaseClient _supabase = Supabase.instance.client;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
+  String? _selectedBillingCycle = 'net_15_days';
   final TextEditingController _maxCreditLimitController =
       TextEditingController();
 
-  String? _selectedBillingCycle = "Billing Cycle";
   bool _autoBlockUdhaar = true;
   bool _isLoading = false;
 
-  final List<String> _billingCycleOptions = [
-    "Billing Cycle",
-    "Weekly",
-    "Bi-Weekly",
-    "Monthly",
-    "Custom",
-  ];
+  final Map<String, String> _billingCycleOptions = {
+    "net_15_days": "15 Days (Net 15)",
+    "net_30_days": "30 Days (Net 30)",
+    "start_of_month": "Start of Month",
+    "end_of_month": "End of Month",
+  };
 
   @override
   void initState() {
     super.initState();
-    _saveCurrentScreen();
+    // _saveCurrentScreen();
   }
 
-  Future<void> _saveCurrentScreen() async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString("last_screen", "create_customer_profile");
-    } catch (e) {
-      debugPrint("SharedPreferences Error: $e");
-    }
-  }
+  // Future<void> _saveCurrentScreen() async {
+  //   try {
+  //     final prefs = await SharedPreferences.getInstance();
+  //     await prefs.setString("last_screen", "customer-khata");
+  //   } catch (e) {
+  //     debugPrint("SharedPreferences Error: $e");
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -52,14 +55,45 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
   Future<void> _openKhata() async {
     if (!_formKey.currentState!.validate()) return;
 
+    if (_selectedBillingCycle == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select billing cycle")),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final user = _supabase.auth.currentUser;
-      if (user == null) throw Exception("User not logged in");
+      final customerId = widget.customerId;
+      debugPrint("========== KHATA DEBUG ==========");
+      debugPrint("Customer ID received from previous screen: $customerId");
 
-      // Yahan aap apna customer/khata database insert logic likh sakte hain
-      await Future.delayed(const Duration(seconds: 1)); // Mock network call
+      if (customerId == null || customerId.isEmpty) {
+        throw Exception("Customer ID is missing");
+      }
+
+      // STEP 3
+      final maxCreditLimit = double.parse(
+        _maxCreditLimitController.text.trim(),
+      );
+
+      debugPrint("Max Credit Limit: $maxCreditLimit");
+      debugPrint("Billing Cycle: $_selectedBillingCycle");
+      debugPrint("Auto Block Udhaar: $_autoBlockUdhaar");
+
+      // STEP 4
+      debugPrint("Creating customer account...");
+
+      final String accountId = await CustomerAccountModel.createKhata(
+        customerId: customerId,
+        maxCreditLimit: maxCreditLimit,
+        billingCycle: _selectedBillingCycle!,
+        autoBlockUdhaar: _autoBlockUdhaar,
+      );
+
+      debugPrint("Customer account created successfully");
+      debugPrint("================================");
 
       if (!mounted) return;
 
@@ -67,9 +101,24 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
         const SnackBar(content: Text("Customer Khata opened successfully.")),
       );
 
-      // Agli screen ka navigation yahan lagayein
-    } catch (e) {
-      debugPrint("Open Khata Error: $e");
+      // Navigator.pushReplacement(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (context) => AddLedger(accountid: accountId),
+      //   ),
+      // );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ViewCustomer(accountid: accountId),
+        ),
+      );
+    } catch (e, stackTrace) {
+      debugPrint("========== KHATA ERROR ==========");
+      debugPrint("Error: $e");
+      debugPrint("StackTrace: $stackTrace");
+      debugPrint("================================");
+
       if (mounted) {
         ScaffoldMessenger.of(
           context,
@@ -90,6 +139,7 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(backgroundColor: Colors.white),
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
@@ -285,7 +335,11 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
       value: _selectedBillingCycle,
       items: _billingCycleOptions,
       icon: Icons.autorenew_rounded,
-      onChanged: (val) => setState(() => _selectedBillingCycle = val),
+      onChanged: (val) {
+        setState(() {
+          _selectedBillingCycle = val;
+        });
+      },
     );
   }
 
@@ -400,38 +454,50 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
   /// Custom Dropdown Helper
   Widget _buildDropdownField({
     required String? value,
-    required List<String> items,
+    required Map<String, String> items,
     required IconData icon,
     required void Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
       value: value,
       isExpanded: true,
+      dropdownColor: Colors.white,
+
       style: const TextStyle(fontSize: 14, color: Colors.black87),
+
       icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black87),
+
       decoration: InputDecoration(
         prefixIcon: Icon(icon, color: Colors.black54, size: 20),
+
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 14,
           vertical: 14,
         ),
+
         filled: true,
         fillColor: Colors.white,
+
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade300, width: 1.2),
         ),
+
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: const BorderSide(color: Color(0xFFFF5500), width: 1.5),
         ),
       ),
-      items: items.map((String item) {
+
+      items: items.entries.map((entry) {
         return DropdownMenuItem<String>(
-          value: item,
-          child: Text(item, style: const TextStyle(color: Colors.black87)),
+          value: entry.key, // Backend value
+          child: Text(
+            entry.value, // Frontend display value
+          ),
         );
       }).toList(),
+
       onChanged: onChanged,
     );
   }

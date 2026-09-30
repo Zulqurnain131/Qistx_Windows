@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:uuid/uuid.dart';
@@ -28,6 +29,7 @@ class _CreateShopProfileState extends State<CreateShopProfile> {
   Uint8List? _selectedImageBytes; // Web Support
   String? _uploadedImageUrl;
   bool _isLoading = false;
+  final shopId = 0;
 
   // Standard shop categories list
   final List<String> _categories = [
@@ -236,7 +238,7 @@ class _CreateShopProfileState extends State<CreateShopProfile> {
 
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (_) => const CreateCustomerProfile()),
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } catch (e) {
       debugPrint("Save Shop Error: $e");
