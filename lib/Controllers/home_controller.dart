@@ -19,7 +19,7 @@ class HomeController {
       }
 
       final List<dynamic> data = response as List<dynamic>;
-      print("Data From Supabase LiquidTrend:$data");
+      print("Data From Supabase LiquidTrend Today:$data");
 
       return data
           .map((item) => Map<String, dynamic>.from(item as Map))

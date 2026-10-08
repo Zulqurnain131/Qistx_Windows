@@ -1130,7 +1130,10 @@ class _OrderinventoryState extends State<Orderinventory> {
     final screenWidth = MediaQuery.of(context).size.width;
     final bool isDesktop = screenWidth > 800;
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.white),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: Colors.white,
 
       floatingActionButton: !isDesktop

@@ -81,8 +81,12 @@ class _ViewCustomerState extends State<ViewCustomer> {
     final double screenWidth = MediaQuery.of(context).size.width;
     final bool isDesktop = screenWidth > 800;
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.white),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: Colors.white,
+
       // Floating "+" button only on mobile — desktop keeps the header button.
       floatingActionButton: isDesktop
           ? null

@@ -11,12 +11,12 @@ class _HelpandsupportState extends State<Helpandsupport> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
-          "Help & support",
-          style: TextStyle(backgroundColor: Colors.orange, color: Colors.white),
-        ),
+        title: Text("Help & support", style: TextStyle(color: Colors.black)),
         centerTitle: true,
+        automaticallyImplyLeading: false,
+        backgroundColor: Colors.white,
       ),
     );
   }

@@ -8,6 +8,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:qistx_app/Providers/CustomerProvider%20.dart';
 import 'package:qistx_app/Providers/ProductStockProvider.dart';
+import 'package:qistx_app/Providers/StatisticsProvider.dart';
 import 'package:qistx_app/Providers/home_provider.dart';
 import 'package:qistx_app/View/auth_screens/splash/splash_screen.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -57,6 +58,7 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => HomeProvider()),
         ChangeNotifierProvider(create: (_) => ProductStockProvider()),
         ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => Statisticsprovider()),
       ],
       child: const MyApp(),
     ),

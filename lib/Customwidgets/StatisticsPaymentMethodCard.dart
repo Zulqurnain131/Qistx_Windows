@@ -34,7 +34,7 @@ class StatisticsPaymentMethodCard extends StatelessWidget {
             Row(
               children: [
                 _buildFilterChip("Yearly", selectedDuration == 'yearly'),
-                _buildFilterChip("Month", selectedDuration == 'monthly'),
+                _buildFilterChip("Month", selectedDuration == 'month'),
                 _buildFilterChip("Weekly", selectedDuration == 'weekly'),
                 _buildFilterChip("Today", selectedDuration == 'today'),
               ],

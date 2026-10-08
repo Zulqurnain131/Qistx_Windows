@@ -109,7 +109,10 @@ class _InventrycatelogState extends State<Inventrycatelog> {
     final String searchQuery = _searchController.text.trim().toLowerCase();
 
     return Scaffold(
-      appBar: AppBar(backgroundColor: Colors.white),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        automaticallyImplyLeading: false,
+      ),
       backgroundColor: Colors.white,
       // "+" floating button only on mobile — desktop keeps the header button.
       floatingActionButton: isDesktop

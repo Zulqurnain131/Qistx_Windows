@@ -3,11 +3,7 @@ import 'package:qistx_app/View/auth_screens/auth_confirmation_pin.dart';
 import 'package:qistx_app/View/auth_screens/auth_create_pin.dart';
 import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/auth_screens/pin_verification_screen.dart';
-import 'package:qistx_app/View/products/add_Ledger.dart';
-import 'package:qistx_app/View/products/add_new_product.dart';
-import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/profilecreation/create_account.dart';
-import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
 import 'package:qistx_app/View/profilecreation/create_shop_profile.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -175,7 +171,24 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: FlutterLogo(size: 100)));
+    /// To get the current screen height and width
+    final size = MediaQuery.of(context).size;
+
+    /// width aur height mein se chhoti dimension leta hai.
+    final logoSize = size.shortestSide * 0.35;
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Center(
+        child: Image.asset(
+          'assets/icons/Qist_Logo_trans.png',
+          width: logoSize,
+          height: logoSize,
+          fit: BoxFit.contain,
+        ),
+      ),
+    );
   }
 }

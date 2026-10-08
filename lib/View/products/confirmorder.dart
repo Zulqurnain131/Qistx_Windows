@@ -3,6 +3,7 @@ import 'package:qistx_app/Controllers/CustomerController.dart';
 import 'package:qistx_app/Controllers/OrderController.dart';
 import 'package:qistx_app/Models/CartItem.dart';
 import 'package:qistx_app/Models/view_customer_model.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
 
 class Confirmorder extends StatefulWidget {
   final List<CartItem> cartItems;
@@ -179,6 +180,10 @@ class _ConfirmorderState extends State<Confirmorder> {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Order created successfully: $orderId')),
+      );
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
       if (!mounted) return;

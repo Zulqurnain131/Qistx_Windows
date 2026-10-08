@@ -9,6 +9,7 @@ import 'package:image/image.dart' as img;
 import 'package:qistx_app/Models/productmodel.dart';
 import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/products/inventrycatelog.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
@@ -352,7 +353,7 @@ class _AddNewProductState extends State<AddNewProduct> {
       // );
       Navigator.push(
         context,
-        MaterialPageRoute(builder: (context) => Inventrycatelog()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     }
   }

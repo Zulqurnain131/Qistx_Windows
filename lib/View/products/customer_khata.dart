@@ -104,14 +104,12 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
       // Navigator.pushReplacement(
       //   context,
       //   MaterialPageRoute(
-      //     builder: (context) => AddLedger(accountid: accountId),
+      //     builder: (context) => ViewCustomer(accountid: accountId),
       //   ),
       // );
-      Navigator.pushReplacement(
+      Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => ViewCustomer(accountid: accountId),
-        ),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e, stackTrace) {
       debugPrint("========== KHATA ERROR ==========");

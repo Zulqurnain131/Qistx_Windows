@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:qistx_app/Controllers/CustomerController.dart';
 import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/products/add_new_product.dart';
+import 'package:qistx_app/View/products/cart.dart';
 import 'package:qistx_app/View/products/inventrycatelog.dart';
 import 'package:qistx_app/View/products/orderinventory.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
@@ -93,6 +94,7 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildLiquidityChart(HomeProvider provider) {
+    debugPrint('Today Liquidity Data: ${provider.liquidityTrend}');
     if (provider.isLiquidityLoading) {
       return const Center(
         child: CircularProgressIndicator(color: Color(0xFFFF5722)),
@@ -777,6 +779,14 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildDesktopQuickAction(
                             Icons.receipt_long_outlined,
                             "View\nCart",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddNewProduct(),
+                                ),
+                              );
+                            },
                           ),
                           _buildDesktopQuickAction(
                             Icons.person_add_alt_outlined,
@@ -794,10 +804,26 @@ class _HomeScreenState extends State<HomeScreen> {
                           _buildDesktopQuickAction(
                             Icons.payments_outlined,
                             "Receive\nPayment",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddNewProduct(),
+                                ),
+                              );
+                            },
                           ),
                           _buildDesktopQuickAction(
                             Icons.insert_drive_file_outlined,
                             "View\nReports",
+                            () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const AddNewProduct(),
+                                ),
+                              );
+                            },
                           ),
                         ],
                       ),

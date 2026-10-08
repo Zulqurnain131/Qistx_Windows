@@ -14,6 +14,7 @@ import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
 import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_guarantors.dart';
 import 'package:qistx_app/View/profilecreation/view_customer.dart';
+import 'package:qistx_app/View/users_screens/home_screen.dart';
 
 class CreateCustomerProfile extends StatefulWidget {
   const CreateCustomerProfile({super.key});
@@ -74,67 +75,83 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
     try {
       // Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      if (!mounted) return;
+
       if (!serviceEnabled) {
         debugPrint("❌ Location Service Off");
-        // Show dialog to enable location
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Please enable location services"),
-              backgroundColor: Colors.orange,
-            ),
-          );
-        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Please enable location services"),
+            backgroundColor: Colors.orange,
+          ),
+        );
+
+        if (!mounted) return;
+
         setState(() {
           isLoadingLocation = false;
-          // Set default location (e.g., Islamabad)
           selectedLocation = const LatLng(33.6844, 73.0479);
           customer.latitude = 33.6844;
           customer.longitude = 73.0479;
         });
+
         return;
       }
 
       // Check permissions
       LocationPermission permission = await Geolocator.checkPermission();
+
+      if (!mounted) return;
+
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+
+        if (!mounted) return;
+
         if (permission == LocationPermission.denied) {
           debugPrint("❌ Permission Denied");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Location permission denied"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Location permission denied"),
+              backgroundColor: Colors.red,
+            ),
+          );
+
+          if (!mounted) return;
+
           setState(() {
             isLoadingLocation = false;
             selectedLocation = const LatLng(33.6844, 73.0479);
             customer.latitude = 33.6844;
             customer.longitude = 73.0479;
           });
+
           return;
         }
       }
 
       if (permission == LocationPermission.deniedForever) {
         debugPrint("❌ Permission Denied Forever");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Location permission permanently denied"),
-              backgroundColor: Colors.red,
-            ),
-          );
-        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text("Location permission permanently denied"),
+            backgroundColor: Colors.red,
+          ),
+        );
+
+        if (!mounted) return;
+
         setState(() {
           isLoadingLocation = false;
           selectedLocation = const LatLng(33.6844, 73.0479);
           customer.latitude = 33.6844;
           customer.longitude = 73.0479;
         });
+
         return;
       }
 
@@ -144,37 +161,49 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
         timeLimit: const Duration(seconds: 10),
       );
 
+      // VERY IMPORTANT
+      if (!mounted) return;
+
+      final newLocation = LatLng(position.latitude, position.longitude);
+
       setState(() {
-        selectedLocation = LatLng(position.latitude, position.longitude);
+        selectedLocation = newLocation;
+
         customer.latitude = position.latitude;
         customer.longitude = position.longitude;
-        isLoadingLocation = false;
 
-        // Move map to current location
-        mapController.move(selectedLocation, 16);
+        isLoadingLocation = false;
       });
 
+      // Move map after widget is confirmed mounted
+      mapController.move(newLocation, 16);
+
       debugPrint(
-        "✅ Current Location: ${selectedLocation.latitude}, ${selectedLocation.longitude}",
+        "✅ Current Location: "
+        "${position.latitude}, ${position.longitude}",
       );
     } catch (e) {
       debugPrint("❌ Error getting location: $e");
+
+      if (!mounted) return;
+
       setState(() {
         isLoadingLocation = false;
-        // Set default location on error
+
         selectedLocation = const LatLng(33.6844, 73.0479);
+
         customer.latitude = 33.6844;
         customer.longitude = 73.0479;
       });
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Error getting location: $e"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Error getting location: $e"),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -408,7 +437,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
                 Navigator.pop(dialogContext); // close dialog only
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => ViewCustomer()),
+                  MaterialPageRoute(builder: (context) => HomeScreen()),
                 );
               },
               child: Text(
@@ -453,6 +482,12 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
     final bool isMobile = screenWidth < 600;
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        elevation: 0,
+      ),
       backgroundColor: Colors.white,
       body: SafeArea(
         child: LayoutBuilder(
