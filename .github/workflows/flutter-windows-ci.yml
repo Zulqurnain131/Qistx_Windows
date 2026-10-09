@@ -21,13 +21,6 @@ jobs:
         with:
           channel: stable
 
-      - name: Create .env file from Secrets
-        run: |
-          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
-          echo "SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" >> .env
-          echo "WEB_CLIENT=${{ secrets.WEB_CLIENT }}" >> .env
-        shell: bash
-
       - name: Install dependencies
         run: flutter pub get
 
@@ -40,10 +33,17 @@ jobs:
       - name: Build Windows application
         run: flutter build windows --release
 
-      - name: Copy .env file to Release folder
-        run: |
-          Copy-Item .env -Destination "build/windows/x64/runner/Release/"
+      - name: Create .env file directly in Release folder
         shell: powershell
+        run: |
+          $releaseDir = "build/windows/x64/runner/Release"
+          if (!(Test-Path $releaseDir)) {
+              New-Item -ItemType Directory -Force -Path $releaseDir
+          }
+          $envContent = "SUPABASE_URL=${{ secrets.SUPABASE_URL }}`nSUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}`nWEB_CLIENT=${{ secrets.WEB_CLIENT }}"
+          Set-Content -Path "$releaseDir/.env" -Value $envContent
+          # Root directory mein bhi rakh dein taake agar code root se read kare toh wahan bhi mojood ho
+          Set-Content -Path ".env" -Value $envContent
 
       - name: Upload Windows Build Artifact
         uses: actions/upload-artifact@v4
