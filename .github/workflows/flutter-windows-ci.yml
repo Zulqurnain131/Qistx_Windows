@@ -42,9 +42,8 @@ jobs:
 
       - name: Copy .env file to Release folder
         run: |
-          mkdir -p build/windows/x64/runner/Release/
-          cp .env build/windows/x64/runner/Release/
-        shell: bash
+          Copy-Item .env -Destination "build/windows/x64/runner/Release/"
+        shell: powershell
 
       - name: Upload Windows Build Artifact
         uses: actions/upload-artifact@v4
