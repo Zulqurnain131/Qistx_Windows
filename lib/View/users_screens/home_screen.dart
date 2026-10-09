@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:qistx_app/Controllers/CustomerController.dart';
 import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/products/add_new_product.dart';
-import 'package:qistx_app/View/products/cart.dart';
 import 'package:qistx_app/View/products/inventrycatelog.dart';
 import 'package:qistx_app/View/products/orderinventory.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
@@ -25,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
-  final CustomerController _customerController = CustomerController();
+  final Customercontroller _customerController = Customercontroller();
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false; // Controls desktop sidebar toggle
   /// Variables

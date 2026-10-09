@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:qistx_app/Models/CartItem.dart';
 
-class OrderController {
+class Ordercontroller {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<String> createOrder({
@@ -12,7 +12,7 @@ class OrderController {
     required double subtotal,
     required double discount,
     required double netTotal,
-    required List<CartItem> items,
+    required List<Cartitem> items,
   }) async {
     try {
       // CartItem -> JSON
@@ -37,8 +37,6 @@ class OrderController {
 
       return response.toString();
     } catch (e) {
-      print('CREATE ORDER RPC ERROR: $e');
-
       throw Exception(e.toString().replaceFirst('Exception: ', ''));
     }
   }

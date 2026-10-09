@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qistx_app/Models/customeraccountModel%20.dart';
-import 'package:qistx_app/View/products/add_Ledger.dart';
-import 'package:qistx_app/View/profilecreation/view_customer.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 
 class CustomerKhata extends StatefulWidget {
   final String? customerId;
@@ -15,7 +11,6 @@ class CustomerKhata extends StatefulWidget {
 }
 
 class _CreateCustomerProfileState extends State<CustomerKhata> {
-  final SupabaseClient _supabase = Supabase.instance.client;
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   String? _selectedBillingCycle = 'net_15_days';
   final TextEditingController _maxCreditLimitController =
@@ -85,14 +80,14 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
       // STEP 4
       debugPrint("Creating customer account...");
 
-      final String accountId = await CustomerAccountModel.createKhata(
+      final String accountId = await Customeraccountmodel.createKhata(
         customerId: customerId,
         maxCreditLimit: maxCreditLimit,
         billingCycle: _selectedBillingCycle!,
         autoBlockUdhaar: _autoBlockUdhaar,
       );
 
-      debugPrint("Customer account created successfully");
+      debugPrint("Customer account created successfully $accountId");
       debugPrint("================================");
 
       if (!mounted) return;
@@ -457,7 +452,7 @@ class _CreateCustomerProfileState extends State<CustomerKhata> {
     required void Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       isExpanded: true,
       dropdownColor: Colors.white,
 

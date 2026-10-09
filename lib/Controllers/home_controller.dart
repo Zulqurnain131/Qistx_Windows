@@ -19,7 +19,6 @@ class HomeController {
       }
 
       final List<dynamic> data = response as List<dynamic>;
-      print("Data From Supabase LiquidTrend Today:$data");
 
       return data
           .map((item) => Map<String, dynamic>.from(item as Map))
@@ -39,7 +38,6 @@ class HomeController {
         'get_top_products_stats',
         params: {'p_shop_id': shopId, 'p_duration': duration},
       );
-      print("Data From Supabase BarChart:$response");
       if (response == null) {
         return [];
       }
@@ -63,7 +61,6 @@ class HomeController {
         'get_dashboard_metrics',
         params: {'p_shop_id': shopId},
       );
-      print("Data From Supabase Dashboard Metricses:$response");
 
       if (response == null) {
         return {};

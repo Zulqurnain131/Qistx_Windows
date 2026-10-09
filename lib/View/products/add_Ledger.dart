@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:qistx_app/Models/ledger_entry_model.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class AddLedger extends StatefulWidget {
   final String? accountid;
@@ -218,7 +217,6 @@ class _AddLedgerState extends State<AddLedger> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Payment added successfully.")),
       );
-      print('Ledgerid$ledgerid');
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
@@ -608,7 +606,7 @@ class _AddLedgerState extends State<AddLedger> {
     required void Function(String?) onChanged,
   }) {
     return DropdownButtonFormField<String>(
-      value: value,
+      initialValue: value,
       isExpanded: true,
       dropdownColor: Colors.white,
 
@@ -691,17 +689,11 @@ class _AddLedgerState extends State<AddLedger> {
 class _DashedBorderPainter extends CustomPainter {
   final Color color;
   final double radius;
-  final double dashWidth;
-  final double dashGap;
-  final double strokeWidth;
+  static const double dashWidth = 5;
+  static const double dashGap = 4;
+  static const double strokeWidth = 1.2;
 
-  _DashedBorderPainter({
-    required this.color,
-    this.radius = 10,
-    this.dashWidth = 5,
-    this.dashGap = 4,
-    this.strokeWidth = 1.2,
-  });
+  const _DashedBorderPainter({required this.color, this.radius = 10});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -739,10 +731,6 @@ class _DashedBorderPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant _DashedBorderPainter oldDelegate) {
-    return oldDelegate.color != color ||
-        oldDelegate.radius != radius ||
-        oldDelegate.dashWidth != dashWidth ||
-        oldDelegate.dashGap != dashGap ||
-        oldDelegate.strokeWidth != strokeWidth;
+    return oldDelegate.color != color || oldDelegate.radius != radius;
   }
 }

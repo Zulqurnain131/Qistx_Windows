@@ -40,7 +40,6 @@ class ViewCustomerModel {
 
   factory ViewCustomerModel.fromJson(Map<String, dynamic> json) {
     final accountData = json['customer_accounts'];
-    print("Customer Account Data :$accountData");
 
     Map<String, dynamic>? account;
 
@@ -49,8 +48,6 @@ class ViewCustomerModel {
     } else if (accountData is Map) {
       account = Map<String, dynamic>.from(accountData);
     }
-    print("Customer ID: ${json['id']}");
-    print("Customer Account ID: ${account?['id']}");
 
     final guarantorData = json['guarantors'];
 

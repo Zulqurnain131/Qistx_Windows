@@ -32,8 +32,9 @@ class _AuthScreenState extends State<AuthScreen> {
       final session = data.session;
 
       // Sirf actual sign-in par react karo
-      if (event != AuthChangeEvent.signedIn || session == null || !mounted)
+      if (event != AuthChangeEvent.signedIn || session == null || !mounted) {
         return;
+      }
 
       try {
         setState(() => _isLoading = true);

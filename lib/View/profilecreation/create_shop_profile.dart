@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
-import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
@@ -444,7 +443,7 @@ class _CreateShopProfileState extends State<CreateShopProfile> {
 
         // Choose Shop Category Dropdown
         DropdownButtonFormField<String>(
-          value: _selectedCategory,
+          initialValue: _selectedCategory,
           isExpanded: true,
           style: const TextStyle(fontSize: 14, color: Colors.black87),
           icon: const Icon(Icons.keyboard_arrow_down, color: Colors.black87),

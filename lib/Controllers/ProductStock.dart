@@ -1,10 +1,10 @@
 import 'package:qistx_app/Models/ProductStockModel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class ProductStock {
+class Productstock {
   final SupabaseClient _supabase = Supabase.instance.client;
 
-  Future<List<ProductStockModel>> fetchProducts() async {
+  Future<List<Productstockmodel>> fetchProducts() async {
     try {
       final response = await _supabase
           .from('products')
@@ -25,11 +25,10 @@ class ProductStock {
           .order('created_at', ascending: false);
 
       final List<dynamic> data = response;
-      print("Product List");
 
       return data
           .map(
-            (item) => ProductStockModel.fromJson(item as Map<String, dynamic>),
+            (item) => Productstockmodel.fromJson(item as Map<String, dynamic>),
           )
           .toList();
     } catch (e) {

@@ -10,7 +10,6 @@ class Statisticscontroller {
         'get_stats_metrics',
         params: {'p_shop_id': shopId},
       );
-      print("STATISTICS METRICES CARD :$response");
 
       return Map<String, dynamic>.from(response);
     } catch (e) {
@@ -28,7 +27,6 @@ class Statisticscontroller {
         'get_payment_method_stats',
         params: {'p_shop_id': shopId, 'p_duration': duration},
       );
-      print("Payment Method Statistics Screen Response :$response");
 
       return List<dynamic>.from(response);
     } catch (e) {

@@ -1,7 +1,7 @@
 import 'package:qistx_app/Models/view_customer_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CustomerController {
+class Customercontroller {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<List<ViewCustomerModel>> fetchCustomers({String? search}) async {
@@ -59,8 +59,6 @@ class CustomerController {
 
       return customers;
     } catch (e) {
-      print('FETCH CUSTOMERS ERROR: $e');
-
       throw Exception('Failed to fetch customers: $e');
     }
   }
@@ -92,7 +90,6 @@ class CustomerController {
 
       return signedUrl;
     } catch (e) {
-      print('SIGNED URL ERROR: $e');
       return null;
     }
   }
@@ -138,8 +135,6 @@ class CustomerController {
 
       return value;
     } catch (e) {
-      print('FAILED TO EXTRACT STORAGE PATH: $e');
-
       return null;
     }
   }
@@ -165,8 +160,6 @@ class CustomerController {
 
       return List<Map<String, dynamic>>.from(response);
     } catch (e) {
-      print('FETCH LEDGER ERROR: $e');
-
       throw Exception('Failed to fetch recent activity: $e');
     }
   }
@@ -266,8 +259,6 @@ class CustomerController {
 
       return customers;
     } catch (e) {
-      print('FETCH KHATA CUSTOMERS ERROR: $e');
-
       throw Exception('Failed to fetch Khata customers: $e');
     }
   }
@@ -289,8 +280,6 @@ class CustomerController {
 
       return response?['id']?.toString();
     } catch (e) {
-      print('GET SHOP ID ERROR: $e');
-
       throw Exception('Failed to get current shop');
     }
   }

@@ -16,7 +16,7 @@ class Staticsandreports extends StatefulWidget {
 }
 
 class _StaticsandreportsState extends State<Staticsandreports> {
-  final CustomerController _customerController = CustomerController();
+  final Customercontroller _customerController = Customercontroller();
   @override
   void initState() {
     super.initState();
@@ -56,6 +56,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
     }
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
@@ -263,7 +264,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                                 sum + ((item['count'] as num?)?.toInt() ?? 0),
                           );
 
-                          return StatisticsPaymentMethodCard(
+                          return Statisticspaymentmethodcard(
                             title: "Payment Method",
                             totalCount: totalCount.toString(),
                             centerSubText: "Orders",
@@ -332,7 +333,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
 
                           final debtors = provider.topDebtors;
 
-                          return StatisticsReportCard(
+                          return Statisticsreportcard(
                             title: "Top 5 Debtors",
                             header1: "Name",
                             header2: "Amount",
@@ -365,7 +366,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
 
                     // 2. Overdue Accounts Card
                     Expanded(
-                      child: StatisticsReportCard(
+                      child: Statisticsreportcard(
                         title: "Overdue Accounts",
                         header1: "Name",
                         header2: "Days",
@@ -413,7 +414,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
 
                     // 3. Dead Stock Card
                     Expanded(
-                      child: StatisticsReportCard(
+                      child: Statisticsreportcard(
                         title: "Dead Stock  (> 90 Days)",
                         header1: "Item Name",
                         header2: "Qty",
@@ -457,7 +458,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                   children: [
                     // 1. Top Products Card
                     Expanded(
-                      child: StatisticsReportCard(
+                      child: Statisticsreportcard(
                         title: "Top Products",
                         filters: const ["Yearly", "Month", "Weekly", "Today"],
                         selectedFilter:
@@ -496,7 +497,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
 
                     // 2. Gross Margin Breakdown Card
                     Expanded(
-                      child: StatisticsReportCard(
+                      child: Statisticsreportcard(
                         title: "Gross Margin Breakdown",
                         filters: const ["Yearly", "Month", "Weekly", "Today"],
                         selectedFilter: "Yearly",
@@ -590,7 +591,7 @@ class StatisticsLiquidityChart extends StatefulWidget {
 }
 
 class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
-  final CustomerController _customerController = CustomerController();
+  final Customercontroller _customerController = Customercontroller();
 
   bool _showTotalSales = true;
   bool _showUdhaar = true;

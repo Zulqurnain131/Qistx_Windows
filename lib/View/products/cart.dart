@@ -4,7 +4,7 @@ import 'package:qistx_app/Models/ProductStockModel.dart';
 import 'package:qistx_app/View/products/confirmorder.dart';
 
 class Cart extends StatefulWidget {
-  final List<CartItem> cartItems;
+  final List<Cartitem> cartItems;
   const Cart({super.key, required this.cartItems});
 
   @override
@@ -32,7 +32,7 @@ class _CartState extends State<Cart> {
   // Same validation rules as the Order Inventory "Add Product" popup,
   // just evaluated against the quantity already sitting in this cart row
   // instead of a quantity about to be added.
-  String? _quantityErrorFor(CartItem item) {
+  String? _quantityErrorFor(Cartitem item) {
     final product = item.product;
     final double quantity = item.quantity;
 
@@ -90,7 +90,7 @@ class _CartState extends State<Cart> {
   // NOTE: "Packed"/"Unpacked" assume a matching value in `product.category`.
   // If packing status lives on a different field in ProductStockModel,
   // swap `product.category` below for that field.
-  List<MapEntry<int, CartItem>> get _mobileFilteredEntries {
+  List<MapEntry<int, Cartitem>> get _mobileFilteredEntries {
     final entries = widget.cartItems.asMap().entries.toList();
     if (_selectedFilter == 'All') return entries;
     return entries
@@ -283,7 +283,7 @@ class _CartState extends State<Cart> {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -317,7 +317,7 @@ class _CartState extends State<Cart> {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.04),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -372,7 +372,7 @@ class _CartState extends State<Cart> {
   }
 
   // Individual Product Row (with Orange Border) — desktop
-  Widget _buildProductRow(CartItem cartItem, int index) {
+  Widget _buildProductRow(Cartitem cartItem, int index) {
     final product = cartItem.product;
 
     return Container(
@@ -644,7 +644,7 @@ class _CartState extends State<Cart> {
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: _mobileFilters.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 8),
+        separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final label = _mobileFilters[index];
           final bool selected = label == _selectedFilter;
@@ -664,7 +664,9 @@ class _CartState extends State<Cart> {
             backgroundColor: Colors.white,
             selectedColor: const Color(0xFFFF5500),
             shape: StadiumBorder(
-              side: BorderSide(color: const Color(0xFFFF5500).withOpacity(0.6)),
+              side: BorderSide(
+                color: const Color(0xFFFF5500).withValues(alpha: 0.6),
+              ),
             ),
             padding: const EdgeInsets.symmetric(horizontal: 12),
             visualDensity: VisualDensity.compact,
@@ -705,7 +707,7 @@ class _CartState extends State<Cart> {
   // left; quantity and line total on the right. Tapping the card opens a
   // bottom sheet to edit quantity or remove the item, keeping the card
   // itself clean like the design.
-  Widget _buildMobileCartCard(CartItem cartItem, int index) {
+  Widget _buildMobileCartCard(Cartitem cartItem, int index) {
     final product = cartItem.product;
     final error = _quantityErrorFor(cartItem);
 
@@ -831,7 +833,7 @@ class _CartState extends State<Cart> {
 
   // Bottom sheet used on mobile to adjust quantity or remove the item,
   // triggered by tapping a cart card.
-  void _openMobileQuantitySheet(CartItem cartItem, int index) {
+  void _openMobileQuantitySheet(Cartitem cartItem, int index) {
     showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
@@ -963,7 +965,7 @@ class _CartState extends State<Cart> {
 /// "Add Product" popup, just sized to sit inside a table row instead of a
 /// dialog. Used only by the desktop view.
 class _CartQuantityStepper extends StatefulWidget {
-  final CartItem cartItem;
+  final Cartitem cartItem;
   final String? errorText;
   final ValueChanged<double> onQuantityChanged;
 
@@ -981,7 +983,7 @@ class _CartQuantityStepper extends StatefulWidget {
 class _CartQuantityStepperState extends State<_CartQuantityStepper> {
   late TextEditingController _controller;
 
-  ProductStockModel get _product => widget.cartItem.product;
+  Productstockmodel get _product => widget.cartItem.product;
 
   @override
   void initState() {

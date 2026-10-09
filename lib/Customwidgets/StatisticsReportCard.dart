@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StatisticsReportCard extends StatelessWidget {
+class Statisticsreportcard extends StatelessWidget {
   final String title;
   final List<String>? filters; // Agar filters (Yearly/Month) chahiye hon
   final String? selectedFilter;
@@ -14,7 +14,7 @@ class StatisticsReportCard extends StatelessWidget {
   // Rows Data
   final List<ReportRowItem> items;
 
-  const StatisticsReportCard({
+  const Statisticsreportcard({
     super.key,
     required this.title,
     this.filters,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class StatisticsPaymentMethodCard extends StatelessWidget {
+class Statisticspaymentmethodcard extends StatelessWidget {
   final String title;
   final String totalCount;
   final String centerSubText;
@@ -8,7 +8,7 @@ class StatisticsPaymentMethodCard extends StatelessWidget {
   final String selectedDuration;
   final Function(String) onDurationChanged;
 
-  const StatisticsPaymentMethodCard({
+  const Statisticspaymentmethodcard({
     super.key,
     required this.title,
     required this.totalCount,

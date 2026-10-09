@@ -54,7 +54,7 @@ class _CustomerprofileState extends State<Customerprofile> {
       final accountId = widget.customer.customerAccountId;
 
       if (accountId != null && accountId.isNotEmpty) {
-        context.read<CustomerProvider>().fetchRecentLedgerEntries(accountId);
+        context.read<Customerprovider>().fetchRecentLedgerEntries(accountId);
       }
     });
   }
@@ -1072,7 +1072,7 @@ class _CustomerprofileState extends State<Customerprofile> {
                     onTap: () => _openCnicViewer(
                       context,
                       title: title,
-                      imageUrl: imageUrl!,
+                      imageUrl: imageUrl,
                     ),
                     child: Stack(
                       alignment: Alignment.center,
@@ -1080,7 +1080,7 @@ class _CustomerprofileState extends State<Customerprofile> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.network(
-                            imageUrl!,
+                            imageUrl,
                             width: double.infinity,
                             height: double.infinity,
                             fit: BoxFit.contain,
@@ -1347,7 +1347,7 @@ class _CustomerprofileState extends State<Customerprofile> {
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: Consumer<CustomerProvider>(
+            child: Consumer<Customerprovider>(
               builder: (context, provider, child) {
                 return _buildRecentActivities(
                   activities: provider.recentLedgerEntries,

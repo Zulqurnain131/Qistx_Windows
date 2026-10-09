@@ -1,6 +1,6 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class CustomerAccountModel {
+class Customeraccountmodel {
   final String customerId;
   final double currentBalance;
   final double maxCreditLimit;
@@ -10,7 +10,7 @@ class CustomerAccountModel {
   final DateTime createdAt;
   final DateTime updatedAt;
 
-  CustomerAccountModel({
+  Customeraccountmodel({
     required this.customerId,
     this.currentBalance = 0,
     required this.maxCreditLimit,
@@ -46,7 +46,6 @@ class CustomerAccountModel {
         })
         .select('id')
         .single();
-    print("Khata created for customer ID: $customerId");
     final String accountId = response['id'].toString();
     return accountId;
   }

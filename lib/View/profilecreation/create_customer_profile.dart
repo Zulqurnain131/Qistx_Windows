@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
@@ -13,7 +12,6 @@ import 'package:qistx_app/Models/guarantermodel.dart';
 import 'package:qistx_app/View/classesui/dashedcirclepainter.dart';
 import 'package:qistx_app/View/products/customer_khata.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_guarantors.dart';
-import 'package:qistx_app/View/profilecreation/view_customer.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 
 class CreateCustomerProfile extends StatefulWidget {

@@ -154,7 +154,6 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
   }) async {
     try {
       // OTP Verify
-      print("Verify OTP EMAIL:$email");
       await _supabase.auth.verifyOTP(
         email: email,
         token: otp,
@@ -162,8 +161,6 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       );
 
       final user = _supabase.auth.currentUser;
-
-      print("User ID = ${user?.id}");
 
       if (user == null) {
         throw Exception("User not found.");
@@ -174,11 +171,8 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
           .from('app_users')
           .select()
           .eq('id', user.id);
-      print("Response = $response");
 
       if (response.isEmpty) {
-        print("Inserting user...");
-
         await _supabase.from('app_users').insert({
           "id": user.id,
           "username": null,
@@ -186,19 +180,15 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
           "profile_image": null,
           "pin_hash": null,
         });
-        print("Insert Success");
       }
 
       // IMPORTANT: User ID return
       return user.id;
     } on AuthException catch (e) {
       debugPrint("Auth Error: ${e.message}");
-      print("Message: ${e.message}");
-      print("Status: ${e.statusCode}");
-      print("Code: ${e.code}");
+
       return null;
     } catch (e) {
-      debugPrint("Error: $e");
       return null;
     }
   }
@@ -222,7 +212,6 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.of(context).size;
     final double screenWidth = screenSize.width;
-    final double screenHeight = screenSize.height;
     final bool isDesktop = screenWidth > 800;
     final bool isMobile = screenWidth < 600;
 
@@ -587,7 +576,6 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
     if (!mounted) return;
 
     if (userId != null) {
-      print("Verified User ID: $userId");
       final prefs = await SharedPreferences.getInstance();
 
       // OTP complete ho gayi

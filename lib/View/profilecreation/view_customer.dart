@@ -24,7 +24,7 @@ class _ViewCustomerState extends State<ViewCustomer> {
     Future.microtask(() {
       if (!mounted) return;
 
-      context.read<CustomerProvider>().fetchCustomers();
+      context.read<Customerprovider>().fetchCustomers();
     });
 
     _searchController.addListener(() {
@@ -221,7 +221,7 @@ class _ViewCustomerState extends State<ViewCustomer> {
                         child: ValueListenableBuilder<String>(
                           valueListenable: _searchQuery,
                           builder: (context, searchQuery, child) {
-                            return Consumer<CustomerProvider>(
+                            return Consumer<Customerprovider>(
                               builder: (context, provider, child) {
                                 final List<ViewCustomerModel>
                                 filteredCustomers = provider.customers.where((

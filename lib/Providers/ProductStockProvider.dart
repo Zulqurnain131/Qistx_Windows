@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:qistx_app/Controllers/ProductStock.dart';
 import 'package:qistx_app/Models/ProductStockModel.dart';
-import 'package:provider/provider.dart';
-import 'package:qistx_app/Providers/ProductStockProvider.dart';
 
-class ProductStockProvider extends ChangeNotifier {
-  final ProductStock _controller = ProductStock();
+class Productstockprovider extends ChangeNotifier {
+  final Productstock _controller = Productstock();
   // Product List
-  List<ProductStockModel> products = [];
+  List<Productstockmodel> products = [];
   // Loading
   bool isLoading = false;
   // Error

@@ -127,7 +127,6 @@ class CustomerModel {
       });
 
       customerInserted = true;
-      print("Customer inserted successfully: $customerId");
 
       // ---------------- Save Guarantors ----------------
       for (final g in guarantors) {
@@ -219,11 +218,8 @@ class CustomerModel {
           "is_active": true,
         });
       }
-      print("Customer inserted successfully: $customerId");
       return customerId;
     } catch (e) {
-      print("KYC Failed: ${e.toString()}");
-
       // Customer delete
       if (customerInserted) {
         try {

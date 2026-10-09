@@ -31,12 +31,12 @@ class _InventrycatelogState extends State<Inventrycatelog> {
     Future.microtask(() {
       if (!mounted) return;
 
-      context.read<ProductStockProvider>().fetchProducts();
+      context.read<Productstockprovider>().fetchProducts();
     });
   }
 
-  Future<void> _deleteProduct(ProductStockModel product) async {
-    final provider = context.read<ProductStockProvider>();
+  Future<void> _deleteProduct(Productstockmodel product) async {
+    final provider = context.read<Productstockprovider>();
 
     await provider.deleteProduct(product.id);
 
@@ -61,7 +61,7 @@ class _InventrycatelogState extends State<Inventrycatelog> {
     }
   }
 
-  Future<void> _confirmDeleteProduct(ProductStockModel product) async {
+  Future<void> _confirmDeleteProduct(Productstockmodel product) async {
     final bool? confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
@@ -310,11 +310,11 @@ class _InventrycatelogState extends State<Inventrycatelog> {
                       SizedBox(height: isDesktop ? 10 : 15),
 
                       Expanded(
-                        child: Consumer<ProductStockProvider>(
+                        child: Consumer<Productstockprovider>(
                           builder: (context, provider, child) {
                             final products = provider.products;
 
-                            final List<ProductStockModel> filteredProducts =
+                            final List<Productstockmodel> filteredProducts =
                                 products.where((product) {
                                   final bool categoryMatch =
                                       selectedCategory == "All" ||
@@ -362,8 +362,8 @@ class _InventrycatelogState extends State<Inventrycatelog> {
                                             ),
                                             boxShadow: [
                                               BoxShadow(
-                                                color: Colors.grey.withOpacity(
-                                                  0.05,
+                                                color: Colors.grey.withValues(
+                                                  alpha: 0.05,
                                                 ),
                                                 blurRadius: 10,
                                                 offset: const Offset(0, 4),
@@ -431,7 +431,7 @@ class _InventrycatelogState extends State<Inventrycatelog> {
   }
 
   Widget _buildProductList(
-    List<ProductStockModel> filteredProducts,
+    List<Productstockmodel> filteredProducts,
     bool isSmallPhone,
     bool isDesktop,
     bool isLoading,
@@ -463,7 +463,10 @@ class _InventrycatelogState extends State<Inventrycatelog> {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: kOrange.withOpacity(0.5), width: 1.1),
+            border: Border.all(
+              color: kOrange.withValues(alpha: 0.5),
+              width: 1.1,
+            ),
           ),
           child: isDesktop
               ? _buildDesktopRow(product)
@@ -501,7 +504,7 @@ class _InventrycatelogState extends State<Inventrycatelog> {
     );
   }
 
-  Widget _productImage(ProductStockModel product, {double size = 76}) {
+  Widget _productImage(Productstockmodel product, {double size = 76}) {
     final hasPhoto =
         product.productPhotoUrl != null && product.productPhotoUrl!.isNotEmpty;
 
@@ -571,7 +574,7 @@ class _InventrycatelogState extends State<Inventrycatelog> {
     );
   }
 
-  Widget _buildDesktopRow(ProductStockModel product) {
+  Widget _buildDesktopRow(Productstockmodel product) {
     return Row(
       children: [
         Expanded(
@@ -649,7 +652,7 @@ class _InventrycatelogState extends State<Inventrycatelog> {
 
   /// Matches the mobile screenshot: image + name/SKU/category, a status
   /// pill, then a divider and a stock/price row with icons.
-  Widget _buildMobileCard(ProductStockModel product) {
+  Widget _buildMobileCard(Productstockmodel product) {
     return SizedBox(
       height: 145, // List item ki fixed height
       child: Column(

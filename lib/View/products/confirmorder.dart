@@ -6,7 +6,7 @@ import 'package:qistx_app/Models/view_customer_model.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 
 class Confirmorder extends StatefulWidget {
-  final List<CartItem> cartItems;
+  final List<Cartitem> cartItems;
 
   const Confirmorder({super.key, required this.cartItems});
 
@@ -15,8 +15,8 @@ class Confirmorder extends StatefulWidget {
 }
 
 class _ConfirmorderState extends State<Confirmorder> {
-  final CustomerController _customerController = CustomerController();
-  List<CartItem> get cartItems => widget.cartItems;
+  final Customercontroller _customerController = Customercontroller();
+  List<Cartitem> get cartItems => widget.cartItems;
   List<ViewCustomerModel> _customers = [];
   List<ViewCustomerModel> _filteredCustomers = [];
   ViewCustomerModel? _selectedCustomer;
@@ -24,7 +24,7 @@ class _ConfirmorderState extends State<Confirmorder> {
   String? _shopId;
   String _selectedOrderType = 'walk_in';
   String _selectedPaymentMethod = 'cash';
-  final OrderController _orderController = OrderController();
+  final Ordercontroller _orderController = Ordercontroller();
   bool _isConfirmingOrder = false;
 
   final List<Map<String, String>> _orderTypes = [

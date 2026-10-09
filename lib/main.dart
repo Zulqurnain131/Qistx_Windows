@@ -56,8 +56,8 @@ Future<void> main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => HomeProvider()),
-        ChangeNotifierProvider(create: (_) => ProductStockProvider()),
-        ChangeNotifierProvider(create: (_) => CustomerProvider()),
+        ChangeNotifierProvider(create: (_) => Productstockprovider()),
+        ChangeNotifierProvider(create: (_) => Customerprovider()),
         ChangeNotifierProvider(create: (_) => Statisticsprovider()),
       ],
       child: const MyApp(),
@@ -131,6 +131,7 @@ class _MyAppState extends State<MyApp> {
   void _handleDeepLink(Uri uri) {
     if (uri.scheme == 'qistxapp') {
       debugPrint('Handling deep link: $uri');
+      // ignore: body_might_complete_normally_catch_error
       Supabase.instance.client.auth.getSessionFromUrl(uri).catchError((e) {
         debugPrint('getSessionFromUrl error: $e');
       });

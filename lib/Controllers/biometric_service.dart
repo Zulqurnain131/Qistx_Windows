@@ -10,7 +10,6 @@ class BiometricService {
     try {
       return await _auth.isDeviceSupported();
     } catch (e) {
-      print('isDeviceSupported error: $e');
       return false;
     }
   }
@@ -19,7 +18,6 @@ class BiometricService {
     try {
       return await _auth.canCheckBiometrics;
     } catch (e) {
-      print('canCheckBiometrics error: $e');
       return false;
     }
   }
@@ -28,7 +26,6 @@ class BiometricService {
     try {
       return await _auth.getAvailableBiometrics();
     } catch (e) {
-      print('getAvailableBiometrics error: $e');
       return [];
     }
   }
@@ -41,7 +38,6 @@ class BiometricService {
         persistAcrossBackgrounding: true,
       );
     } catch (e) {
-      print('Biometric authentication error: $e');
       return false;
     }
   }
@@ -50,17 +46,12 @@ class BiometricService {
     final prefs = await SharedPreferences.getInstance();
 
     final result = await prefs.setBool(_biometricKey, value);
-
-    print('Saving biometric: $value');
-    print('SharedPreferences save result: $result');
   }
 
   Future<bool> isBiometricEnabled() async {
     final prefs = await SharedPreferences.getInstance();
 
     final value = prefs.getBool(_biometricKey) ?? false;
-
-    print('Reading biometric: $value');
 
     return value;
   }

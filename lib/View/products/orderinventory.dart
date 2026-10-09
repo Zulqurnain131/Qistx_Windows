@@ -12,7 +12,7 @@ class Orderinventory extends StatefulWidget {
 }
 
 class _AddProductSheet extends StatefulWidget {
-  final ProductStockModel product;
+  final Productstockmodel product;
   final double cartQuantity;
   final bool isMobile;
   final ScrollController? scrollController;
@@ -22,8 +22,8 @@ class _AddProductSheet extends StatefulWidget {
     required this.product,
     this.cartQuantity = 0,
     required this.isMobile,
-    this.scrollController,
     required this.onAddToCart,
+    this.scrollController,
   });
 
   @override
@@ -394,7 +394,7 @@ class _AddProductSheetState extends State<_AddProductSheet> {
   }
 
   Widget _buildImage(
-    ProductStockModel product, {
+    Productstockmodel product, {
     required double height,
     required double radius,
   }) {
@@ -467,7 +467,7 @@ class _AddProductSheetState extends State<_AddProductSheet> {
 // ============================================================
 
 class _MobileAddProductSheet extends StatefulWidget {
-  final ProductStockModel product;
+  final Productstockmodel product;
   final double cartQuantity;
   final void Function(double quantity) onAddToCart;
 
@@ -863,7 +863,7 @@ class _MobileAddProductSheetState extends State<_MobileAddProductSheet> {
 // ============================================================
 // MOBILE PRODUCT CARD WIDGET  (full-width vertical list card)
 class _MobileProductCard extends StatelessWidget {
-  final ProductStockModel product;
+  final Productstockmodel product;
   final double cartQuantity;
   final VoidCallback onTap;
 
@@ -1004,7 +1004,7 @@ class _OrderinventoryState extends State<Orderinventory> {
     "Unpacked",
   ];
 
-  List<CartItem> cartItems = [];
+  List<Cartitem> cartItems = [];
 
   int _selectedCategoryIndex = 0;
 
@@ -1020,11 +1020,11 @@ class _OrderinventoryState extends State<Orderinventory> {
     super.initState();
 
     Future.microtask(() {
-      context.read<ProductStockProvider>().fetchProducts();
+      context.read<Productstockprovider>().fetchProducts();
     });
   }
 
-  void _addToCart(ProductStockModel product, double quantity) {
+  void _addToCart(Productstockmodel product, double quantity) {
     final index = cartItems.indexWhere((item) => item.product.id == product.id);
     final existingQuantity = index != -1 ? cartItems[index].quantity : 0;
     final totalQuantity = existingQuantity + quantity;
@@ -1038,7 +1038,7 @@ class _OrderinventoryState extends State<Orderinventory> {
       if (index != -1) {
         cartItems[index].quantity += quantity;
       } else {
-        cartItems.add(CartItem(product: product, quantity: quantity));
+        cartItems.add(Cartitem(product: product, quantity: quantity));
       }
     });
 
@@ -1050,7 +1050,7 @@ class _OrderinventoryState extends State<Orderinventory> {
   // Mobile -> Bottom Sheet | Desktop -> Dialog
   // Both wrap the same shared _AddProductSheet widget.
   // ============================================================
-  void _showAddProductDialog(ProductStockModel product) {
+  void _showAddProductDialog(Productstockmodel product) {
     final isMobile = MediaQuery.of(context).size.width <= 800;
     final cartQty = _cartQuantityFor(product.id);
 
@@ -1378,7 +1378,7 @@ class _OrderinventoryState extends State<Orderinventory> {
                       ),
                       // const SizedBox(height: 16),
                       SizedBox(height: isDesktop ? 15 : 16),
-                      Consumer<ProductStockProvider>(
+                      Consumer<Productstockprovider>(
                         builder: (context, provider, child) {
                           final searchQuery = _searchController.text
                               .trim()
@@ -1522,7 +1522,7 @@ class _OrderinventoryState extends State<Orderinventory> {
                                   ),
                                 ),
                               Expanded(
-                                child: Consumer<ProductStockProvider>(
+                                child: Consumer<Productstockprovider>(
                                   builder: (context, provider, child) {
                                     final products = provider.products;
 
@@ -1604,7 +1604,7 @@ class _OrderinventoryState extends State<Orderinventory> {
   // Every card here is just `_MobileProductCard` — the only thing
   // that changed is which builder this switch calls.)
   // ============================================================
-  Widget _buildMobileList(List<ProductStockModel> filteredProducts) {
+  Widget _buildMobileList(List<Productstockmodel> filteredProducts) {
     return GridView.builder(
       physics: const BouncingScrollPhysics(),
       padding: const EdgeInsets.only(bottom: 20),
@@ -1630,7 +1630,7 @@ class _OrderinventoryState extends State<Orderinventory> {
   // ============================================================
   // DESKTOP: TABLE LAYOUT — untouched
   // ============================================================
-  Widget _buildDesktopList(List<ProductStockModel> filteredProducts) {
+  Widget _buildDesktopList(List<Productstockmodel> filteredProducts) {
     return ListView.separated(
       physics: const BouncingScrollPhysics(),
       itemCount: filteredProducts.length,

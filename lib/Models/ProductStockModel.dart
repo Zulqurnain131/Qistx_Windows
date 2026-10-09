@@ -1,4 +1,4 @@
-class ProductStockModel {
+class Productstockmodel {
   final String id;
   final String productName;
   final String sku;
@@ -10,7 +10,7 @@ class ProductStockModel {
   final double? warningQty;
   final bool allowfractionalsales;
 
-  ProductStockModel({
+  Productstockmodel({
     required this.id,
     required this.productName,
     required this.sku,
@@ -27,7 +27,7 @@ class ProductStockModel {
   // FROM JSON
   // ---------------------------------------------------------
 
-  factory ProductStockModel.fromJson(Map<String, dynamic> json) {
+  factory Productstockmodel.fromJson(Map<String, dynamic> json) {
     final List<dynamic> batches =
         (json['product_batches'] as List<dynamic>?) ?? [];
 
@@ -35,7 +35,7 @@ class ProductStockModel {
         ? batches.first as Map<String, dynamic>
         : null;
 
-    return ProductStockModel(
+    return Productstockmodel(
       id: json['id']?.toString() ?? '',
       productName: json['product_name']?.toString() ?? '',
       sku: json['sku']?.toString() ?? '',

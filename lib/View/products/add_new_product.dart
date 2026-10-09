@@ -1,16 +1,12 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:typed_data';
 
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image/image.dart' as img;
 import 'package:qistx_app/Models/productmodel.dart';
-import 'package:qistx_app/View/products/customer_khata.dart';
-import 'package:qistx_app/View/products/inventrycatelog.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AddNewProduct extends StatefulWidget {
@@ -114,7 +110,6 @@ class _AddNewProductState extends State<AddNewProduct> {
 
   ////////////// Save Data Function
   Future<bool> _saveProduct() async {
-    print("Product Function Called");
     if (_isSaving) return false;
 
     final productName = productNameController.text.trim();
@@ -560,12 +555,12 @@ class _AddNewProductState extends State<AddNewProduct> {
     final bool isEditing = editIndex != null;
 
     final TextEditingController unitNameController = TextEditingController(
-      text: isEditing ? wholesaleConversions[editIndex!]['unitName'] : '',
+      text: isEditing ? wholesaleConversions[editIndex]['unitName'] : '',
     );
 
     final TextEditingController multiplierController = TextEditingController(
       text: isEditing
-          ? wholesaleConversions[editIndex!]['multiplier'].toString()
+          ? wholesaleConversions[editIndex]['multiplier'].toString()
           : '',
     );
 
@@ -665,7 +660,7 @@ class _AddNewProductState extends State<AddNewProduct> {
                 setState(() {
                   if (isEditing) {
                     // Update existing conversion
-                    wholesaleConversions[editIndex!] = {
+                    wholesaleConversions[editIndex] = {
                       'unitName': unitName,
                       'multiplier': multiplier,
                     };

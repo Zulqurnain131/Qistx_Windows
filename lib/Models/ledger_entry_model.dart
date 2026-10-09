@@ -113,22 +113,13 @@ class LedgerEntryModel {
           .select('id')
           .single();
       final String ledgerid = response['id'].toString();
-      print("New Ledgerid$ledgerid");
 
       // -----------------------------------------
       // Done
       // -----------------------------------------
 
-      print(
-        'Ledger entry saved successfully. '
-        'Account ID: $accountId, '
-        'Type: $entryType, '
-        'Amount: $amount',
-      );
       return ledgerid;
     } catch (e) {
-      print('Save Ledger Entry Error: $e');
-
       throw Exception('Failed to save ledger entry: $e');
     }
   }
