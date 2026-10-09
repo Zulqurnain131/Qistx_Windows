@@ -23,7 +23,9 @@ jobs:
 
       - name: Create .env file from Secrets
         run: |
-          echo "API_URL=${{ secrets.API_URL }}" >> .env
+          echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env
+          echo "SUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}" >> .env
+          echo "WEB_CLIENT=${{ secrets.WEB_CLIENT }}" >> .env
         shell: bash
 
       - name: Install dependencies
@@ -37,6 +39,12 @@ jobs:
 
       - name: Build Windows application
         run: flutter build windows --release
+
+      - name: Copy .env file to Release folder
+        run: |
+          mkdir -p build/windows/x64/runner/Release/
+          cp .env build/windows/x64/runner/Release/
+        shell: bash
 
       - name: Upload Windows Build Artifact
         uses: actions/upload-artifact@v4

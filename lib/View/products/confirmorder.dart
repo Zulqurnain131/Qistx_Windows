@@ -72,10 +72,8 @@ class _ConfirmorderState extends State<Confirmorder> {
       setState(() {
         _shopId = shopId;
       });
-
-      print('CURRENT SHOP ID: $_shopId');
     } catch (e) {
-      print(e);
+      // print(e);
     }
   }
 
