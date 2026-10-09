@@ -24,17 +24,22 @@ jobs:
       - name: Create .env file from Secrets
         run: |
           echo "API_URL=${{ secrets.API_URL }}" >> .env
-          # Agar aur bhi variables hain toh wo yahan add kar dein
         shell: bash
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Analyze Flutter code
-        run: flutter analyze || true  # Pipeline fail hone se bachane ke liye
+        run: flutter analyze || true
 
       - name: Run automated tests
         run: flutter test
 
       - name: Build Windows application
         run: flutter build windows --release
+
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QistX-Windows-Release
+          path: build/windows/x64/runner/Release/
