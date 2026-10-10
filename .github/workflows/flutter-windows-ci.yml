@@ -1,0 +1,52 @@
+name: QistX Windows CI
+
+on:
+  push:
+    branches:
+      - zulqurnain/auth_features
+  pull_request:
+    branches:
+      - zulqurnain/auth_features
+
+jobs:
+  test:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze Flutter code
+        run: flutter analyze || true
+
+      - name: Run automated tests
+        run: flutter test
+
+      - name: Build Windows application
+        run: flutter build windows --release
+
+      - name: Create .env file directly in Release folder
+        shell: powershell
+        run: |
+          $releaseDir = "build/windows/x64/runner/Release"
+          if (!(Test-Path $releaseDir)) {
+              New-Item -ItemType Directory -Force -Path $releaseDir
+          }
+          $envContent = "SUPABASE_URL=${{ secrets.SUPABASE_URL }}`nSUPABASE_PUBLISHABLE_KEY=${{ secrets.SUPABASE_PUBLISHABLE_KEY }}`nWEB_CLIENT=${{ secrets.WEB_CLIENT }}"
+          Set-Content -Path "$releaseDir/.env" -Value $envContent
+          # Root directory mein bhi rakh dein taake agar code root se read kare toh wahan bhi mojood ho
+          Set-Content -Path ".env" -Value $envContent
+
+      - name: Upload Windows Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: QistX-Windows-Release
+          path: build/windows/x64/runner/Release/
