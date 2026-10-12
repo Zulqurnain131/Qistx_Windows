@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:qistx_app/Controllers/CustomerController.dart';
-import 'package:qistx_app/Controllers/OrderController.dart';
-import 'package:qistx_app/Models/CartItem.dart';
+import 'package:qistx_app/Controllers/Customer_Controller.dart';
+import 'package:qistx_app/Controllers/ordercontroller.dart';
+import 'package:qistx_app/Models/cartitem.dart';
 import 'package:qistx_app/Models/view_customer_model.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 
@@ -15,7 +15,7 @@ class Confirmorder extends StatefulWidget {
 }
 
 class _ConfirmorderState extends State<Confirmorder> {
-  final Customercontroller _customerController = Customercontroller();
+  final CustomerController _customerController = CustomerController();
   List<Cartitem> get cartItems => widget.cartItems;
   List<ViewCustomerModel> _customers = [];
   List<ViewCustomerModel> _filteredCustomers = [];

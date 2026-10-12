@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qistx_app/Models/CartItem.dart';
-import 'package:qistx_app/Models/ProductStockModel.dart';
-import 'package:qistx_app/Providers/ProductStockProvider.dart';
+import 'package:qistx_app/Models/cartitem.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
+import 'package:qistx_app/Providers/productstockprovider.dart';
 import 'package:qistx_app/View/products/cart.dart';
 
 class Orderinventory extends StatefulWidget {
@@ -15,7 +15,7 @@ class _AddProductSheet extends StatefulWidget {
   final Productstockmodel product;
   final double cartQuantity;
   final bool isMobile;
-  final ScrollController? scrollController;
+  // final ScrollController? scrollController;
   final void Function(double quantity) onAddToCart;
 
   const _AddProductSheet({
@@ -23,7 +23,7 @@ class _AddProductSheet extends StatefulWidget {
     this.cartQuantity = 0,
     required this.isMobile,
     required this.onAddToCart,
-    this.scrollController,
+    // this.scrollController,
   });
 
   @override
@@ -83,7 +83,7 @@ class _AddProductSheetState extends State<_AddProductSheet> {
     final double subtotal = product.salePrice * _quantity;
 
     return SingleChildScrollView(
-      controller: widget.scrollController,
+      // controller: widget.scrollController,
       padding: EdgeInsets.fromLTRB(
         m ? 20 : 24,
         m ? 12 : 24,
@@ -185,7 +185,7 @@ class _AddProductSheetState extends State<_AddProductSheet> {
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
-                  color: const Color(0xFFFF5500).withOpacity(0.5),
+                  color: const Color(0xFFFF5500).withValues(alpha: 0.5),
                   width: 1.2,
                 ),
               ),
@@ -408,7 +408,7 @@ class _AddProductSheetState extends State<_AddProductSheet> {
             ? Image.network(
                 product.productPhotoUrl!,
                 fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => _placeholder(iconSize),
+                errorBuilder: (_, _, _) => _placeholder(iconSize),
               )
             : _placeholder(iconSize),
       ),
@@ -876,7 +876,7 @@ class _MobileProductCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final stockLabel = product.formattedAvailableStock(cartQuantity);
-    print("StockLablel:$stockLabel");
+    // print("StockLablel:$stockLabel");
 
     return GestureDetector(
       onTap: onTap,
@@ -1016,10 +1016,13 @@ class _OrderinventoryState extends State<Orderinventory> {
   }
 
   @override
+  @override
   void initState() {
     super.initState();
 
-    Future.microtask(() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+
       context.read<Productstockprovider>().fetchProducts();
     });
   }
@@ -1059,7 +1062,7 @@ class _OrderinventoryState extends State<Orderinventory> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        barrierColor: Colors.black.withOpacity(0.55),
+        barrierColor: Colors.black.withValues(alpha: 0.55),
         builder: (sheetContext) {
           return FractionallySizedBox(
             heightFactor: 0.55,
@@ -1084,7 +1087,7 @@ class _OrderinventoryState extends State<Orderinventory> {
     } else {
       showDialog(
         context: context,
-        barrierColor: Colors.black.withOpacity(0.5),
+        barrierColor: Colors.black.withValues(alpha: 0.5),
         builder: (dialogContext) => Dialog(
           backgroundColor: Colors.transparent,
           insetPadding: const EdgeInsets.symmetric(horizontal: 24),
@@ -1433,7 +1436,9 @@ class _OrderinventoryState extends State<Orderinventory> {
                                   ),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.grey.withOpacity(0.05),
+                                      color: Colors.grey.withValues(
+                                        alpha: 0.05,
+                                      ),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -1650,7 +1655,7 @@ class _OrderinventoryState extends State<Orderinventory> {
               color: Colors.white,
               borderRadius: BorderRadius.circular(10),
               border: Border.all(
-                color: const Color(0xFFFF5500).withOpacity(0.5),
+                color: const Color(0xFFFF5500).withValues(alpha: 0.5),
                 width: 1.1,
               ),
             ),

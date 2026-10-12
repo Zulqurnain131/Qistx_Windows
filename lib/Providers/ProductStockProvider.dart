@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:qistx_app/Controllers/ProductStock.dart';
-import 'package:qistx_app/Models/ProductStockModel.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
 
 class Productstockprovider extends ChangeNotifier {
   final Productstock _controller = Productstock();

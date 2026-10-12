@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qistx_app/Models/customeraccountModel%20.dart';
+import 'package:qistx_app/Models/customer_account_model.dart.dart';
 import 'package:qistx_app/View/users_screens/home_screen.dart';
 
 class CustomerKhata extends StatefulWidget {

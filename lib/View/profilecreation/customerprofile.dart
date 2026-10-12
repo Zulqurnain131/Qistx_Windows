@@ -3,8 +3,8 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:provider/provider.dart';
 import 'package:qistx_app/Models/view_customer_model.dart';
-import 'package:qistx_app/Providers/CustomerProvider%20.dart';
-import 'package:qistx_app/View/products/add_Ledger.dart';
+import 'package:qistx_app/Providers/customer_provider.dart';
+import 'package:qistx_app/View/products/add_ledger.dart';
 import 'package:qistx_app/View/products/customer_khata.dart';
 
 enum _Breakpoint { mobile, tablet, desktop }
@@ -24,7 +24,7 @@ class _CustomerprofileState extends State<Customerprofile> {
     borderRadius: BorderRadius.circular(16),
     boxShadow: [
       BoxShadow(
-        color: Colors.black.withOpacity(0.04),
+        color: Colors.black.withValues(alpha: 0.04),
         blurRadius: 10,
         offset: const Offset(0, 4),
       ),
@@ -77,14 +77,13 @@ class _CustomerprofileState extends State<Customerprofile> {
 
     showDialog(
       context: context,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withValues(alpha: 0.85),
       builder: (dialogContext) => StatefulBuilder(
         builder: (context, setDialogState) {
           void setScale(double newScale) {
             newScale = newScale.clamp(1.0, 5.0);
             setDialogState(() => scale = newScale);
-            transformationController.value = Matrix4.identity()
-              ..scale(newScale);
+            transformationController.value = Matrix4.identity();
           }
 
           return Dialog(
@@ -384,7 +383,7 @@ class _CustomerprofileState extends State<Customerprofile> {
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: const Text(
@@ -410,7 +409,7 @@ class _CustomerprofileState extends State<Customerprofile> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.12),
+          color: Colors.white.withValues(alpha: 0.12),
           borderRadius: BorderRadius.circular(10),
         ),
         child: Row(
@@ -675,7 +674,7 @@ class _CustomerprofileState extends State<Customerprofile> {
                   width: 90,
                   height: 90,
                   fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) => _profilePlaceholder(),
+                  errorBuilder: (_, _, _) => _profilePlaceholder(),
                 )
               : _profilePlaceholder(),
         ),
@@ -1096,7 +1095,7 @@ class _CustomerprofileState extends State<Customerprofile> {
                           child: Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.65),
+                              color: Colors.black.withValues(alpha: 0.65),
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: const Icon(

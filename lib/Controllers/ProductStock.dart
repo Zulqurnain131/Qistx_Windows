@@ -1,4 +1,4 @@
-import 'package:qistx_app/Models/ProductStockModel.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class Productstock {

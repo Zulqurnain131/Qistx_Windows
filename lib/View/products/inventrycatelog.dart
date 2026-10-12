@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
 import 'package:qistx_app/View/products/add_new_product.dart';
 import 'package:provider/provider.dart';
-import 'package:qistx_app/Models/ProductStockModel.dart';
-import 'package:qistx_app/Providers/ProductStockProvider.dart';
+import 'package:qistx_app/Providers/productstockprovider.dart';
 
 class Inventrycatelog extends StatefulWidget {
   const Inventrycatelog({super.key});

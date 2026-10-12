@@ -122,6 +122,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       await _saveTimer();
       _startTimer(); // Timer dobara start
     } on AuthException catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(e.message)));
@@ -519,7 +520,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       child: Container(
         margin: EdgeInsets.symmetric(horizontal: horizontalMargin),
         decoration: BoxDecoration(
-          color: const Color(0xFFECEFF1).withOpacity(0.6),
+          color: const Color(0xFFECEFF1).withValues(alpha: 0.6),
           borderRadius: BorderRadius.circular(12),
         ),
         child: Center(
@@ -588,6 +589,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       if (pinExists) {
         // Next screen save
         await prefs.setString("last_screen", "pin_verification");
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const PinVerificationScreen()),
@@ -595,6 +597,7 @@ class _AuthConfirmationPinState extends State<AuthConfirmationPin> {
       } else {
         // Next screen save
         await prefs.setString("last_screen", "create_pin");
+        if (!mounted) return;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => AuthCreatePin(userId: userId)),

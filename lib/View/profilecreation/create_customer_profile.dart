@@ -155,8 +155,10 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
 
       // Get current position
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
 
       // VERY IMPORTANT
@@ -226,7 +228,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
     if (originalBytes == null) return;
 
     final compressedBytes = await compressTo300KB(originalBytes);
-
+    if (!mounted) return;
     if (compressedBytes == null) {
       ScaffoldMessenger.of(
         context,
@@ -306,7 +308,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
       }
 
       final compressedBytes = await compressTo300KB(originalBytes);
-
+      if (!mounted) return;
       if (compressedBytes == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Image compression failed")),
@@ -398,7 +400,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
       }
 
       final customerId = await customer.saveCustomer();
-      print("✅ Created Customer ID: $customerId");
+      // print("✅ Created Customer ID: $customerId");
 
       if (!mounted) return;
 
@@ -413,6 +415,7 @@ class _CreateCustomerProfileState extends State<CreateCustomerProfile> {
     }
   }
 
+  // ignore: strict_top_level_inference
   void _showProfileCreatedDialog(final customerId) {
     showDialog(
       context: context,

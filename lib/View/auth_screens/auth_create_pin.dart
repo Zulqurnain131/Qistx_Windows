@@ -380,7 +380,7 @@ class _AuthCreatePinState extends State<AuthCreatePin> {
               ? EdgeInsets.zero
               : const EdgeInsets.only(right: 10.0),
           decoration: BoxDecoration(
-            color: const Color(0xFFECEFF1).withOpacity(0.6),
+            color: const Color(0xFFECEFF1).withValues(alpha: 0.6),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(

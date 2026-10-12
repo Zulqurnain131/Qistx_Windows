@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:qistx_app/Models/CartItem.dart';
-import 'package:qistx_app/Models/ProductStockModel.dart';
+import 'package:qistx_app/Models/cartitem.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
 import 'package:qistx_app/View/products/confirmorder.dart';
 
 class Cart extends StatefulWidget {

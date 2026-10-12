@@ -192,7 +192,8 @@ class _AddLedgerState extends State<AddLedger> {
     });
 
     try {
-      final String ledgerid = await _ledgerEntryModel.saveLedgerEntry(
+      // final String ledgerid =
+      await _ledgerEntryModel.saveLedgerEntry(
         accountId: widget.accountid!,
 
         // IMPORTANT:

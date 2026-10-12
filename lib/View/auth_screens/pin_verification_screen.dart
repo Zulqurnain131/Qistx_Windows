@@ -89,7 +89,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
       final prefs = await SharedPreferences.getInstance();
 
       await prefs.remove("last_screen");
-
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => HomeScreen()),
@@ -331,7 +331,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
                                   border: Border.all(
                                     color: const Color(
                                       0xFFFF5F00,
-                                    ).withOpacity(0.15),
+                                    ).withValues(alpha: 0.15),
                                     width: 1.5,
                                   ),
                                   borderRadius: BorderRadius.circular(16),
@@ -384,7 +384,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
                 horizontal: 5.0,
               ), // Row components safe padding
               decoration: BoxDecoration(
-                color: const Color(0xFFECEFF1).withOpacity(0.6),
+                color: const Color(0xFFECEFF1).withValues(alpha: 0.6),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Center(
@@ -446,7 +446,7 @@ class _PinVerificationScreenState extends State<PinVerificationScreen> {
       debugPrint("PIN Verified Successfully");
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove("last_screen");
-
+      if (!mounted) return;
       // Home Screen par bhej dein
       Navigator.pushReplacement(
         context,

@@ -59,7 +59,7 @@ class _AuthScreenState extends State<AuthScreen> {
             MaterialPageRoute(builder: (_) => const PinVerificationScreen()),
           );
         } else {
-          print("Pass User ID AUTHCREATE PIN");
+          // print("Pass User ID AUTHCREATE PIN");
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (_) => AuthCreatePin(userId: user.id)),
@@ -137,7 +137,7 @@ class _AuthScreenState extends State<AuthScreen> {
           .millisecondsSinceEpoch;
 
       await prefs.setInt("otp_expiry", expiry);
-
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => AuthConfirmationPin(email: email)),
@@ -207,7 +207,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
             if (_isLoading)
               Container(
-                color: Colors.black.withOpacity(0.3),
+                color: Colors.black.withValues(alpha: 0.3),
                 child: const Center(
                   child: CircularProgressIndicator(
                     valueColor: AlwaysStoppedAnimation<Color>(
@@ -442,7 +442,7 @@ class _AuthScreenState extends State<AuthScreen> {
           borderRadius: BorderRadius.circular(14),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.02),
+              color: Colors.black.withValues(alpha: 0.02),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),

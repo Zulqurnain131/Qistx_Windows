@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:qistx_app/Controllers/CustomerController.dart';
-import 'package:qistx_app/Customwidgets/StatisticsOrderTableCard.dart';
-import 'package:qistx_app/Customwidgets/StatisticsPaymentMethodCard.dart';
-import 'package:qistx_app/Customwidgets/StatisticsReportCard.dart';
-import 'package:qistx_app/Customwidgets/Statistics_Screen_Widgets.dart';
-import 'package:qistx_app/Providers/StatisticsProvider.dart';
+import 'package:qistx_app/Controllers/Customer_Controller.dart';
+import 'package:qistx_app/Customwidgets/statisticsordertablecard.dart';
+import 'package:qistx_app/Customwidgets/statisticspaymentmethodcard.dart';
+import 'package:qistx_app/Customwidgets/statisticsreportcard.dart';
+import 'package:qistx_app/Customwidgets/statistics_screen_widgets.dart';
+import 'package:qistx_app/Providers/statisticsprovider.dart';
 import 'package:qistx_app/Providers/home_provider.dart';
 
 class Staticsandreports extends StatefulWidget {
@@ -16,7 +16,7 @@ class Staticsandreports extends StatefulWidget {
 }
 
 class _StaticsandreportsState extends State<Staticsandreports> {
-  final Customercontroller _customerController = Customercontroller();
+  final CustomerController _customerController = CustomerController();
   @override
   void initState() {
     super.initState();
@@ -606,8 +606,9 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                             };
 
                             if (duration ==
-                                provider.selectedTopProductsDuration)
+                                provider.selectedTopProductsDuration) {
                               return;
+                            }
 
                             final shopId = await _customerController
                                 .getCurrentShopId();
@@ -677,8 +678,9 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                             };
 
                             if (duration ==
-                                provider.selectedProfitMarginDuration)
+                                provider.selectedProfitMarginDuration) {
                               return;
+                            }
 
                             final shopId = await _customerController
                                 .getCurrentShopId();
@@ -821,7 +823,7 @@ class StatisticsLiquidityChart extends StatefulWidget {
 }
 
 class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
-  final Customercontroller _customerController = Customercontroller();
+  final CustomerController _customerController = CustomerController();
 
   bool _showTotalSales = true;
   bool _showUdhaar = true;

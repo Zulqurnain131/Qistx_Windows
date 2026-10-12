@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:qistx_app/Controllers/CustomerController.dart';
+import 'package:qistx_app/Controllers/customer_controller.dart';
 import 'package:qistx_app/View/auth_screens/auth_screen.dart';
 import 'package:qistx_app/View/products/add_new_product.dart';
 import 'package:qistx_app/View/products/inventrycatelog.dart';
@@ -24,7 +24,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final SupabaseClient _supabase = Supabase.instance.client;
-  final Customercontroller _customerController = Customercontroller();
+  final CustomerController _customerController = CustomerController();
   int _selectedIndex = 0;
   bool _isSidebarCollapsed = false; // Controls desktop sidebar toggle
   /// Variables
@@ -270,7 +270,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   borderRadius: BorderRadius.circular(24),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.03),
+                      color: Colors.black.withValues(alpha: 0.03),
                       blurRadius: 15,
                       offset: const Offset(0, 4),
                     ),
@@ -330,7 +330,7 @@ class _HomeScreenState extends State<HomeScreen> {
         border: Border.all(color: const Color(0xFFFFD8CC), width: 1.5),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 15,
             offset: const Offset(0, 4),
           ),
@@ -1202,7 +1202,7 @@ class _HomeScreenState extends State<HomeScreen> {
           Text(
             subtext,
             style: TextStyle(
-              color: textColor.withOpacity(0.9),
+              color: textColor.withValues(alpha: 0.9),
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -1219,7 +1219,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   height: 5,
                   width: double.infinity,
                   color: isFilled
-                      ? Colors.white.withOpacity(0.35)
+                      ? Colors.white.withValues(alpha: 0.35)
                       : const Color(0xFFFFD8CC),
                 ),
                 // Filled portion
@@ -1369,7 +1369,7 @@ class _HomeScreenState extends State<HomeScreen> {
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 10,
             offset: const Offset(0, -2),
           ),

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:qistx_app/Controllers/CustomerController.dart';
+import 'package:qistx_app/Controllers/Customer_Controller.dart';
 import 'package:qistx_app/Models/view_customer_model.dart';
 
 class Customerprovider extends ChangeNotifier {
-  final Customercontroller _controller = Customercontroller();
+  final CustomerController _controller = CustomerController();
 
   // ================= CUSTOMERS =================
 

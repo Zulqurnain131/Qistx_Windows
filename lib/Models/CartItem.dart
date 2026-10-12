@@ -1,4 +1,4 @@
-import 'package:qistx_app/Models/ProductStockModel.dart';
+import 'package:qistx_app/Models/productstockmodel.dart';
 
 class Cartitem {
   final Productstockmodel product;

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:qistx_app/Models/view_customer_model.dart';
-import 'package:qistx_app/Providers/CustomerProvider%20.dart';
+import 'package:qistx_app/Providers/customer_provider.dart';
 import 'package:qistx_app/View/profilecreation/create_customer_profile.dart';
 import 'package:qistx_app/View/profilecreation/customerprofile.dart';
 
@@ -265,7 +265,9 @@ class _ViewCustomerState extends State<ViewCustomer> {
                                                 boxShadow: [
                                                   BoxShadow(
                                                     color: Colors.grey
-                                                        .withOpacity(0.05),
+                                                        .withValues(
+                                                          alpha: 0.05,
+                                                        ),
                                                     blurRadius: 10,
                                                     offset: const Offset(0, 4),
                                                   ),
@@ -350,7 +352,7 @@ class _ViewCustomerState extends State<ViewCustomer> {
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(
-                            color: kPrimary.withOpacity(0.5),
+                            color: kPrimary.withValues(alpha: 0.5),
                             width: 1.1,
                           ),
                         ),
@@ -370,7 +372,7 @@ class _ViewCustomerState extends State<ViewCustomer> {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(
-                          color: kPrimary.withOpacity(0.75),
+                          color: kPrimary.withValues(alpha: 0.75),
                           width: 1,
                         ),
                       ),

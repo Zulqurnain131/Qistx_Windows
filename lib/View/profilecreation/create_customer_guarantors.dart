@@ -121,10 +121,11 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
 
       // Get current position with timeout
       Position position = await Geolocator.getCurrentPosition(
-        desiredAccuracy: LocationAccuracy.high,
-        timeLimit: const Duration(seconds: 10),
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 10),
+        ),
       );
-
       setState(() {
         selectedLocation = LatLng(position.latitude, position.longitude);
         customergurantor.latitude = position.latitude;
@@ -183,7 +184,7 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
     if (originalBytes == null) return;
 
     final compressedBytes = await compressTo300KB(originalBytes);
-
+    if (!mounted) return;
     if (compressedBytes == null) {
       ScaffoldMessenger.of(
         context,
@@ -254,7 +255,7 @@ class _CreateCustomerGuarantorsState extends State<CreateCustomerGuarantors> {
       }
 
       final compressedBytes = await compressTo300KB(originalBytes);
-
+      if (!mounted) return;
       if (compressedBytes == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Image compression failed")),

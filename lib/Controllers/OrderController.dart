@@ -1,5 +1,5 @@
+import 'package:qistx_app/Models/cartitem.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:qistx_app/Models/CartItem.dart';
 
 class Ordercontroller {
   final SupabaseClient _supabase = Supabase.instance.client;

@@ -1,7 +1,7 @@
 import 'package:qistx_app/Models/view_customer_model.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
-class Customercontroller {
+class CustomerController {
   final SupabaseClient _supabase = Supabase.instance.client;
 
   Future<List<ViewCustomerModel>> fetchCustomers({String? search}) async {

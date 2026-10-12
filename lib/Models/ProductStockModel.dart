@@ -1,3 +1,4 @@
+// ignore: file_names
 class Productstockmodel {
   final String id;
   final String productName;
