@@ -32,6 +32,10 @@ class _StaticsandreportsState extends State<Staticsandreports> {
         provider.loadPaymentMethodStatistics(shopId, 'yearly'),
         provider.loadTopDebtors(shopId),
         provider.loadStatsMetrics(shopId),
+        provider.loadOverdueAccounts(shopId),
+        provider.loadDeadStock(shopId),
+        provider.loadTopSellingProducts(shopId, 'yearly'),
+        provider.loadProductProfitMargins(shopId, 'yearly'),
       ]);
     });
   }
@@ -74,15 +78,28 @@ class _StaticsandreportsState extends State<Staticsandreports> {
       body: Stack(
         children: [
           // 1. Fixed Background Image at Bottom Right (Yeh hamesha fixed rahegi)
+
           Positioned(
             right: 0,
             bottom: 0,
             child: IgnorePointer(
-              child: Image.asset(
-                'assets/images/auth_confirmation_pin.png',
-                width:
-                    400, // Aap apni zaroorat ke mutabiq width adjust kar sakte hain
-                fit: BoxFit.cover,
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final screenWidth = MediaQuery.sizeOf(context).width;
+
+                  if (screenWidth < 900) {
+                    return const SizedBox.shrink();
+                  }
+
+                  return Opacity(
+                    opacity: 0.85,
+                    child: Image.asset(
+                      'assets/images/auth_confirmation_pin.png',
+                      width: 400,
+                      fit: BoxFit.contain,
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -105,8 +122,15 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                   ),
                 ),
 
-                const SizedBox(height: 20),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).width < 600
+                      ? 16
+                      : MediaQuery.sizeOf(context).width < 900
+                      ? 22
+                      : 30,
+                ),
                 // Top 4 Metric Cards Row
+                // Top 4 Metric Cards Responsive Section
                 Consumer<Statisticsprovider>(
                   builder: (context, provider, child) {
                     // Loading
@@ -148,396 +172,601 @@ class _StaticsandreportsState extends State<Staticsandreports> {
 
                     // Values
                     final aovValue = (aov?['value'] as num?)?.toDouble() ?? 0;
-
                     final aovChange =
                         (aov?['change_pct'] as num?)?.toDouble() ?? 0;
 
                     final khataTotal = (khata?['total'] as num?)?.toInt() ?? 0;
-
                     final khataNew =
                         (khata?['new_this_month'] as num?)?.toInt() ?? 0;
 
                     final marginValue =
                         (margin?['value'] as num?)?.toDouble() ?? 0;
-
                     final marginChange =
                         (margin?['change_pct'] as num?)?.toDouble() ?? 0;
 
                     final overdueAmount =
                         (overdue?['net_total'] as num?)?.toDouble() ?? 0;
 
-                    return Row(
+                    // Build card widgets list
+                    final cardList = [
+                      // 1. Average Order Value
+                      StatisticsScreenWidgets.buildStatCard(
+                        title: "Average Order Value",
+                        value: "${aovValue.toStringAsFixed(0)} PKR",
+                        subtitle:
+                            "${aovChange >= 0 ? '↑' : '↓'} ${aovChange.abs().toStringAsFixed(1)}% vs Yesterday",
+                        isPrimary: true,
+                        subtitleColor: aovChange >= 0
+                            ? Colors.white
+                            : Colors.red.shade100,
+                      ),
+                      // 2. Active Khata Accounts
+                      StatisticsScreenWidgets.buildStatCard(
+                        title: "Active Khata Accounts",
+                        value: khataTotal.toString(),
+                        subtitle: "$khataNew New this month",
+                        isPrimary: false,
+                        subtitleColor: Colors.green,
+                      ),
+                      // 3. Avg Gross Margin
+                      StatisticsScreenWidgets.buildStatCard(
+                        title: "Avg Gross Margin",
+                        value: "${marginValue.toStringAsFixed(1)}%",
+                        subtitle:
+                            "${marginChange >= 0 ? '+' : ''}${marginChange.toStringAsFixed(1)}% vs Previous",
+                        isPrimary: false,
+                        subtitleColor: marginChange >= 0
+                            ? Colors.green
+                            : Colors.red,
+                      ),
+                      // 4. Total Overdue Amount
+                      StatisticsScreenWidgets.buildStatCard(
+                        title: "Total Overdue Amount",
+                        value: "${overdueAmount.toStringAsFixed(0)} PKR",
+                        subtitle: "Requires Attention",
+                        isPrimary: false,
+                        subtitleColor: Colors.red,
+                      ),
+                    ];
+
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final screenWidth = constraints.maxWidth;
+
+                        // Desktop / Large screens (900px and above): Single Row with 4 cards
+                        if (screenWidth >= 900) {
+                          return Row(
+                            children: cardList
+                                .map(
+                                  (card) => Expanded(
+                                    child: Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4.0,
+                                      ),
+                                      child: card,
+                                    ),
+                                  ),
+                                )
+                                .toList(),
+                          );
+                        }
+
+                        // Mobile (< 600px) & Tablet (600px - 899px): Clean 2x2 Grid Layout
+                        return Column(
+                          children: [
+                            Row(
+                              children: [
+                                Expanded(child: cardList[0]),
+                                const SizedBox(width: 8),
+                                Expanded(child: cardList[1]),
+                              ],
+                            ),
+                            const SizedBox(height: 8),
+                            Row(
+                              children: [
+                                Expanded(child: cardList[2]),
+                                const SizedBox(width: 8),
+                                Expanded(child: cardList[3]),
+                              ],
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                  },
+                ),
+
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).width < 600
+                      ? 16
+                      : MediaQuery.sizeOf(context).width < 900
+                      ? 22
+                      : 30,
+                ),
+
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = constraints.maxWidth;
+
+                    // Desktop / Large screens (900px and above): Keep side-by-side Row layout
+                    if (screenWidth >= 900) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Expanded(
+                            flex: 2,
+                            child: StatisticsLiquidityChart(),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            flex: 2,
+                            child: Consumer<Statisticsprovider>(
+                              builder: (context, provider, child) {
+                                if (provider.isPaymentMethodLoading) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+
+                                if (provider.paymentMethodError != null) {
+                                  return Center(
+                                    child: Text(
+                                      provider.paymentMethodError!,
+                                      style: const TextStyle(color: Colors.red),
+                                    ),
+                                  );
+                                }
+
+                                final paymentData =
+                                    provider.paymentMethodStatistics;
+
+                                final totalCount = paymentData.fold<int>(
+                                  0,
+                                  (sum, item) =>
+                                      sum +
+                                      ((item['count'] as num?)?.toInt() ?? 0),
+                                );
+
+                                return Statisticspaymentmethodcard(
+                                  title: "Payment Method",
+                                  totalCount: totalCount.toString(),
+                                  centerSubText: "Orders",
+                                  selectedDuration:
+                                      provider.selectedPaymentDuration,
+                                  onDurationChanged: (duration) async {
+                                    final shopId = await _customerController
+                                        .getCurrentShopId();
+
+                                    if (!mounted || shopId == null) return;
+
+                                    await provider.loadPaymentMethodStatistics(
+                                      shopId,
+                                      duration,
+                                    );
+                                  },
+                                  items: paymentData.map<PaymentLegendItem>((
+                                    item,
+                                  ) {
+                                    final method =
+                                        item['method']?.toString() ?? '';
+                                    final percentage =
+                                        (item['percentage'] as num?)
+                                            ?.toStringAsFixed(1) ??
+                                        '0';
+
+                                    return PaymentLegendItem(
+                                      color: _getPaymentColor(method),
+                                      label: "$method ($percentage%)",
+                                    );
+                                  }).toList(),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }
+
+                    // Mobile (< 600px) & Tablet (600px - 899px): Stack vertically to avoid horizontal overflow
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // 1. Average Order Value
-                        Expanded(
-                          child: StatisticsScreenWidgets.buildStatCard(
-                            title: "Average Order Value",
-                            value: "${aovValue.toStringAsFixed(0)} PKR",
-                            subtitle:
-                                "${aovChange >= 0 ? '↑' : '↓'} ${aovChange.abs().toStringAsFixed(1)}% vs Yesterday",
-                            isPrimary: true,
-                            subtitleColor: aovChange >= 0
-                                ? Colors.white
-                                : Colors.red.shade100,
-                          ),
-                        ),
+                        const StatisticsLiquidityChart(),
+                        const SizedBox(height: 16),
+                        Consumer<Statisticsprovider>(
+                          builder: (context, provider, child) {
+                            if (provider.isPaymentMethodLoading) {
+                              return const Center(
+                                child: CircularProgressIndicator(),
+                              );
+                            }
 
-                        const SizedBox(width: 8),
+                            if (provider.paymentMethodError != null) {
+                              return Center(
+                                child: Text(
+                                  provider.paymentMethodError!,
+                                  style: const TextStyle(color: Colors.red),
+                                ),
+                              );
+                            }
 
-                        // 2. Active Khata Accounts
-                        Expanded(
-                          child: StatisticsScreenWidgets.buildStatCard(
-                            title: "Active Khata Accounts",
-                            value: khataTotal.toString(),
-                            subtitle: "$khataNew New this month",
-                            isPrimary: false,
-                            subtitleColor: Colors.green,
-                          ),
-                        ),
+                            final paymentData =
+                                provider.paymentMethodStatistics;
 
-                        const SizedBox(width: 8),
+                            final totalCount = paymentData.fold<int>(
+                              0,
+                              (sum, item) =>
+                                  sum + ((item['count'] as num?)?.toInt() ?? 0),
+                            );
 
-                        // 3. Avg Gross Margin
-                        Expanded(
-                          child: StatisticsScreenWidgets.buildStatCard(
-                            title: "Avg Gross Margin",
-                            value: "${marginValue.toStringAsFixed(1)}%",
-                            subtitle:
-                                "${marginChange >= 0 ? '+' : ''}${marginChange.toStringAsFixed(1)}% vs Previous",
-                            isPrimary: false,
-                            subtitleColor: marginChange >= 0
-                                ? Colors.green
-                                : Colors.red,
-                          ),
-                        ),
+                            return Statisticspaymentmethodcard(
+                              title: "Payment Method",
+                              totalCount: totalCount.toString(),
+                              centerSubText: "Orders",
+                              selectedDuration:
+                                  provider.selectedPaymentDuration,
+                              onDurationChanged: (duration) async {
+                                final shopId = await _customerController
+                                    .getCurrentShopId();
 
-                        const SizedBox(width: 8),
+                                if (!mounted || shopId == null) return;
 
-                        // 4. Total Overdue Amount
-                        Expanded(
-                          child: StatisticsScreenWidgets.buildStatCard(
-                            title: "Total Overdue Amount",
-                            value: "${overdueAmount.toStringAsFixed(0)} PKR",
-                            subtitle: "Requires Attention",
-                            isPrimary: false,
-                            subtitleColor: Colors.red,
-                          ),
+                                await provider.loadPaymentMethodStatistics(
+                                  shopId,
+                                  duration,
+                                );
+                              },
+                              items: paymentData.map<PaymentLegendItem>((item) {
+                                final method = item['method']?.toString() ?? '';
+                                final percentage =
+                                    (item['percentage'] as num?)
+                                        ?.toStringAsFixed(1) ??
+                                    '0';
+
+                                return PaymentLegendItem(
+                                  color: _getPaymentColor(method),
+                                  label: "$method ($percentage%)",
+                                );
+                              }).toList(),
+                            );
+                          },
                         ),
                       ],
                     );
                   },
                 ),
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).width < 600
+                      ? 16
+                      : MediaQuery.sizeOf(context).width < 900
+                      ? 22
+                      : 30,
+                ),
+                LayoutBuilder(
+                  builder: (context, constraints) {
+                    final screenWidth = constraints.maxWidth;
 
-                const SizedBox(height: 50),
+                    // Define helper widgets for cards
+                    final topDebtorsCard = Consumer<Statisticsprovider>(
+                      builder: (context, provider, child) {
+                        if (provider.isTopDebtorsLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
 
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Left side: Line Chart (Sales Trend)
-                    const Expanded(flex: 2, child: StatisticsLiquidityChart()),
-                    const SizedBox(width: 12),
-
-                    // Right side: Pie/Donut Chart (Payment Method)
-                    Expanded(
-                      child: Consumer<Statisticsprovider>(
-                        builder: (context, provider, child) {
-                          if (provider.isPaymentMethodLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }
-
-                          if (provider.paymentMethodError != null) {
-                            return Center(
-                              child: Text(
-                                provider.paymentMethodError!,
-                                style: const TextStyle(color: Colors.red),
+                        if (provider.topDebtorsError != null) {
+                          return Center(
+                            child: Text(
+                              provider.topDebtorsError!,
+                              style: const TextStyle(
+                                color: Colors.red,
+                                fontSize: 12,
                               ),
-                            );
-                          }
-
-                          final paymentData = provider.paymentMethodStatistics;
-
-                          final totalCount = paymentData.fold<int>(
-                            0,
-                            (sum, item) =>
-                                sum + ((item['count'] as num?)?.toInt() ?? 0),
+                            ),
                           );
+                        }
 
-                          return Statisticspaymentmethodcard(
-                            title: "Payment Method",
-                            totalCount: totalCount.toString(),
-                            centerSubText: "Orders",
+                        final debtors = provider.topDebtors;
 
-                            selectedDuration: provider.selectedPaymentDuration,
+                        return Statisticsreportcard(
+                          title: "Top 5 Debtors",
+                          header1: "Name",
+                          header2: "Amount",
+                          header3: null,
+                          items: debtors.map<ReportRowItem>((item) {
+                            final name =
+                                item['full_name']?.toString() ?? 'Unknown';
+                            final cnic = item['cnic_no']?.toString() ?? '';
+                            final debtAmount =
+                                (item['debt_amount'] as num?)?.toDouble() ?? 0;
 
-                            onDurationChanged: (duration) async {
-                              final shopId = await _customerController
-                                  .getCurrentShopId();
-
-                              if (!mounted || shopId == null) {
-                                return;
-                              }
-
-                              await provider.loadPaymentMethodStatistics(
-                                shopId,
-                                duration,
-                              );
-                            },
-
-                            items: paymentData.map<PaymentLegendItem>((item) {
-                              final method = item['method']?.toString() ?? '';
-
-                              final percentage =
-                                  (item['percentage'] as num?)?.toStringAsFixed(
-                                    1,
-                                  ) ??
-                                  '0';
-
-                              return PaymentLegendItem(
-                                color: _getPaymentColor(method),
-                                label: "$method ($percentage%)",
-                              );
-                            }).toList(),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 30),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. Top 5 Debtors Card
-                    Expanded(
-                      child: Consumer<Statisticsprovider>(
-                        builder: (context, provider, child) {
-                          if (provider.isTopDebtorsLoading) {
-                            return const Center(
-                              child: CircularProgressIndicator(),
+                            return ReportRowItem(
+                              col1Title: name,
+                              col1Subtitle: cnic.isNotEmpty
+                                  ? "CNIC: $cnic"
+                                  : null,
+                              col2Text: "${debtAmount.toStringAsFixed(0)} PKR",
+                              col2Color: const Color(0xFFFF5722),
                             );
-                          }
+                          }).toList(),
+                        );
+                      },
+                    );
 
-                          if (provider.topDebtorsError != null) {
-                            return Center(
-                              child: Text(
-                                provider.topDebtorsError!,
-                                style: const TextStyle(
-                                  color: Colors.red,
-                                  fontSize: 12,
-                                ),
-                              ),
-                            );
-                          }
-
-                          final debtors = provider.topDebtors;
-
-                          return Statisticsreportcard(
-                            title: "Top 5 Debtors",
-                            header1: "Name",
-                            header2: "Amount",
-                            header3: null,
-                            items: debtors.map<ReportRowItem>((item) {
-                              final name =
-                                  item['full_name']?.toString() ?? 'Unknown';
-                              final cnic = item['cnic_no']?.toString() ?? '';
-                              final debtAmount =
-                                  (item['debt_amount'] as num?)?.toDouble() ??
-                                  0;
-
-                              return ReportRowItem(
-                                col1Title: name,
-                                col1Subtitle: cnic.isNotEmpty
-                                    ? "CNIC: $cnic"
-                                    : null,
-                                col2Text:
-                                    "${debtAmount.toStringAsFixed(0)} PKR",
-                                col2Color: const Color(0xFFFF5722),
-                                col3Text: null,
-                                col3Color: null,
-                              );
-                            }).toList(),
+                    // Overdue Accounts
+                    final overdueAccountsCard = Consumer<Statisticsprovider>(
+                      builder: (context, provider, child) {
+                        if (provider.isOverdueAccountsLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
                           );
-                        },
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                        }
 
-                    // 2. Overdue Accounts Card
-                    Expanded(
-                      child: Statisticsreportcard(
-                        title: "Overdue Accounts",
-                        header1: "Name",
-                        header2: "Days",
-                        header3: "Amount",
-                        items: [
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
+                        if (provider.overdueAccountsError != null) {
+                          return Text(
+                            provider.overdueAccountsError!,
+                            style: const TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final accounts = provider.overdueAccounts;
+
+                        return Statisticsreportcard(
+                          title: "Overdue Accounts",
+                          header1: "Name",
+                          header2: "Days",
+                          header3: "Amount",
+                          items: accounts.map<ReportRowItem>((item) {
+                            final name = item['name']?.toString() ?? 'Unknown';
+                            final days = (item['days'] as num?)?.toInt() ?? 0;
+                            final amount =
+                                (item['amount'] as num?)?.toDouble() ?? 0;
+
+                            return ReportRowItem(
+                              col1Title: name,
+                              col2Text: days.toString(),
+                              col3Text: "${amount.toStringAsFixed(0)} PKR",
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+
+                    // Dead Stock
+                    final deadStockCard = Consumer<Statisticsprovider>(
+                      builder: (context, provider, child) {
+                        if (provider.isDeadStockLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (provider.deadStockError != null) {
+                          return Text(
+                            provider.deadStockError!,
+                            style: const TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final products = provider.deadStock;
+
+                        return Statisticsreportcard(
+                          title: "Dead Stock (> 90 Days)",
+                          header1: "Item Name",
+                          header2: "Qty",
+                          items: products.map<ReportRowItem>((item) {
+                            final name =
+                                item['item_name']?.toString() ?? 'Unknown';
+                            final qty = (item['qty'] as num?)?.toInt() ?? 0;
+
+                            return ReportRowItem(
+                              col1Title: name,
+                              col2Text: qty.toString(),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+
+                    // Top 5 Selling Products
+                    final topProductsCard = Consumer<Statisticsprovider>(
+                      builder: (context, provider, child) {
+                        if (provider.isTopSellingProductsLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (provider.topSellingProductsError != null) {
+                          return Text(
+                            provider.topSellingProductsError!,
+                            style: const TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final products = provider.topSellingProducts;
+
+                        return Statisticsreportcard(
+                          title: "Top Products",
+                          filters: const ["Yearly", "Month", "Weekly", "Today"],
+                          selectedFilter:
+                              switch (provider.selectedTopProductsDuration) {
+                                'monthly' => 'Month',
+                                'weekly' => 'Weekly',
+                                'today' => 'Today',
+                                _ => 'Yearly',
+                              },
+                          onFilterChanged: (filter) async {
+                            final duration = switch (filter.toLowerCase()) {
+                              'month' => 'monthly',
+                              'weekly' => 'weekly',
+                              'today' => 'today',
+                              _ => 'yearly',
+                            };
+
+                            if (duration ==
+                                provider.selectedTopProductsDuration)
+                              return;
+
+                            final shopId = await _customerController
+                                .getCurrentShopId();
+
+                            if (!mounted || shopId == null) return;
+
+                            await provider.loadTopSellingProducts(
+                              shopId,
+                              duration,
+                            );
+                          },
+                          header1: "Product",
+                          header2: "Volume Sold",
+                          header3: "Revenue (PKR)",
+                          items: products.map<ReportRowItem>((item) {
+                            final name =
+                                item['product_name']?.toString() ?? 'Unknown';
+                            final qty =
+                                (item['volume_sold'] as num?)?.toInt() ?? 0;
+                            final revenue =
+                                (item['revenue'] as num?)?.toDouble() ?? 0;
+
+                            return ReportRowItem(
+                              col1Title: name,
+                              col2Text: qty.toString(),
+                              col3Text: revenue.toStringAsFixed(0),
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+
+                    // Gross Margin Breakdown
+                    final grossMarginCard = Consumer<Statisticsprovider>(
+                      builder: (context, provider, child) {
+                        if (provider.isProductProfitMarginsLoading) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        }
+
+                        if (provider.productProfitMarginsError != null) {
+                          return Text(
+                            provider.productProfitMarginsError!,
+                            style: const TextStyle(color: Colors.red),
+                          );
+                        }
+
+                        final products = provider.productProfitMargins;
+
+                        return Statisticsreportcard(
+                          title: "Gross Margin Breakdown",
+                          filters: const ["Yearly", "Month", "Weekly", "Today"],
+                          selectedFilter:
+                              switch (provider.selectedProfitMarginDuration) {
+                                'monthly' => 'Month',
+                                'weekly' => 'Weekly',
+                                'today' => 'Today',
+                                _ => 'Yearly',
+                              },
+                          onFilterChanged: (filter) async {
+                            final duration = switch (filter.toLowerCase()) {
+                              'month' => 'monthly',
+                              'weekly' => 'weekly',
+                              'today' => 'today',
+                              _ => 'yearly',
+                            };
+
+                            if (duration ==
+                                provider.selectedProfitMarginDuration)
+                              return;
+
+                            final shopId = await _customerController
+                                .getCurrentShopId();
+
+                            if (!mounted || shopId == null) return;
+
+                            await provider.loadProductProfitMargins(
+                              shopId,
+                              duration,
+                            );
+                          },
+                          header1: "Product",
+                          header2: "Avg Sale Price",
+                          header3: "Profit Margin",
+                          items: products.map<ReportRowItem>((item) {
+                            final name =
+                                item['product_name']?.toString() ?? 'Unknown';
+                            final price =
+                                (item['avg_sale_price'] as num?)?.toDouble() ??
+                                0;
+                            final margin =
+                                (item['profit_margin'] as num?)?.toDouble() ??
+                                0;
+
+                            return ReportRowItem(
+                              col1Title: name,
+                              col2Text: "${price.toStringAsFixed(0)} PKR",
+                              col3Text: "${margin.toStringAsFixed(1)}%",
+                              col3Color: margin >= 0
+                                  ? Colors.green
+                                  : Colors.red,
+                            );
+                          }).toList(),
+                        );
+                      },
+                    );
+
+                    // Desktop View (900px and above): Multi-column Rows
+                    if (screenWidth >= 900) {
+                      return Column(
+                        children: [
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: topDebtorsCard),
+                              const SizedBox(width: 12),
+                              Expanded(child: overdueAccountsCard),
+                              const SizedBox(width: 12),
+                              Expanded(child: deadStockCard),
+                            ],
                           ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Ali Raza",
-                            col2Text: "12",
-                            col3Text: "10,000",
+                          const SizedBox(height: 30),
+                          Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(child: topProductsCard),
+                              const SizedBox(width: 12),
+                              Expanded(child: grossMarginCard),
+                            ],
                           ),
                         ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
+                      );
+                    }
 
-                    // 3. Dead Stock Card
-                    Expanded(
-                      child: Statisticsreportcard(
-                        title: "Dead Stock  (> 90 Days)",
-                        header1: "Item Name",
-                        header2: "Qty",
-                        items: [
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Lipton Yellow Label 50g",
-                            col2Text: "12",
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    // Mobile & Tablet View (< 900px): Stack vertically to avoid horizontal overflow
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        topDebtorsCard,
+                        const SizedBox(height: 20),
+                        overdueAccountsCard,
+                        const SizedBox(height: 20),
+                        deadStockCard,
+                        const SizedBox(height: 20),
+                        topProductsCard,
+                        const SizedBox(height: 20),
+                        grossMarginCard,
+                      ],
+                    );
+                  },
                 ),
-                const SizedBox(height: 30),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // 1. Top Products Card
-                    Expanded(
-                      child: Statisticsreportcard(
-                        title: "Top Products",
-                        filters: const ["Yearly", "Month", "Weekly", "Today"],
-                        selectedFilter:
-                            "Yearly", // Aap isko state ke zariye dynamic bhi kar sakte hain
-                        onFilterChanged: (filter) {
-                          // Yahan filter change hone ki state update karein
-                        },
-                        header1: "Product",
-                        header2: "Volume Sold",
-                        header3: "Revenue (PKR)",
-                        items: [
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "12",
-                            col3Text: "10,000",
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-
-                    // 2. Gross Margin Breakdown Card
-                    Expanded(
-                      child: Statisticsreportcard(
-                        title: "Gross Margin Breakdown",
-                        filters: const ["Yearly", "Month", "Weekly", "Today"],
-                        selectedFilter: "Yearly",
-                        onFilterChanged: (filter) {
-                          // Yahan filter change hone ki state update karein
-                        },
-                        header1: "Product Category",
-                        header2: "Avg Sale Price",
-                        header3: "Profit Margin",
-                        items: [
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "350 PKR",
-                            col3Text: "42%",
-                            col3Color:
-                                Colors.green, // Image ke mutabiq green rang
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "350 PKR",
-                            col3Text: "20%",
-                            col3Color: Colors.red, // Image ke mutabiq red rang
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "1350 PKR",
-                            col3Text:
-                                "", // Agar margin na ho toh khali chhor sakte hain
-                          ),
-                          ReportRowItem(
-                            col1Title: "Doodh Pilau Milk 1L",
-                            col2Text: "350 PKR",
-                            col3Text: "",
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                SizedBox(
+                  height: MediaQuery.sizeOf(context).width < 600
+                      ? 16
+                      : MediaQuery.sizeOf(context).width < 900
+                      ? 22
+                      : 30,
                 ),
-                SizedBox(height: 40),
                 StatisticsOrderTableCard(
                   title: "All Orders",
                   searchController: TextEditingController(),
@@ -582,6 +811,7 @@ class _StaticsandreportsState extends State<Staticsandreports> {
   }
 }
 
+// 1. Updated StatisticsLiquidityChart Header
 class StatisticsLiquidityChart extends StatefulWidget {
   const StatisticsLiquidityChart({super.key});
 
@@ -651,6 +881,7 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
           style: TextStyle(
             fontSize: 10,
             color: isSelected ? Colors.white : Colors.grey.shade600,
+            fontWeight: FontWeight.w500,
           ),
         ),
       ),
@@ -665,7 +896,7 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
     }
 
     if (provider.liquidityError != null) {
-      return Center(
+      return const Center(
         child: Text(
           'Unable to load chart data',
           style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -674,7 +905,7 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
     }
 
     if (provider.liquidityTrend.isEmpty) {
-      return Center(
+      return const Center(
         child: Text(
           'No sales data available',
           style: TextStyle(color: Colors.grey, fontSize: 12),
@@ -682,14 +913,29 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
       );
     }
 
-    return CustomPaint(
-      size: Size.infinite,
-      painter: StatisticsLineChartPainter(
-        data: provider.liquidityTrend,
-        duration: provider.selectedLiquidityDuration,
-        showTotalSales: _showTotalSales,
-        showUdhaar: _showUdhaar,
-        showCollection: _showCollection,
+    // Har data point ke liye minimum horizontal space
+    const double pointSpacing = 60;
+    const double minimumChartWidth = 500;
+
+    final double chartWidth = (provider.liquidityTrend.length * pointSpacing)
+        .clamp(minimumChartWidth, double.infinity)
+        .toDouble();
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: SizedBox(
+        width: chartWidth,
+        height: 180,
+        child: CustomPaint(
+          painter: StatisticsLineChartPainter(
+            data: provider.liquidityTrend,
+            duration: provider.selectedLiquidityDuration,
+            showTotalSales: _showTotalSales,
+            showUdhaar: _showUdhaar,
+            showCollection: _showCollection,
+          ),
+        ),
       ),
     );
   }
@@ -699,41 +945,47 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Header with Title and Horizontally Scrollable Filter Chips
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             const Text(
               "Liquidity Trend",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-
-            Consumer<HomeProvider>(
-              builder: (context, provider, child) {
-                return Row(
-                  children: [
-                    _buildFilterChip(
-                      "Yearly",
-                      provider.selectedLiquidityDuration == 'yearly',
-                      onTap: () => _changeLiquidityDuration('yearly'),
-                    ),
-                    _buildFilterChip(
-                      "Month",
-                      provider.selectedLiquidityDuration == 'monthly',
-                      onTap: () => _changeLiquidityDuration('monthly'),
-                    ),
-                    _buildFilterChip(
-                      "Weekly",
-                      provider.selectedLiquidityDuration == 'weekly',
-                      onTap: () => _changeLiquidityDuration('weekly'),
-                    ),
-                    _buildFilterChip(
-                      "Today",
-                      provider.selectedLiquidityDuration == 'today',
-                      onTap: () => _changeLiquidityDuration('today'),
-                    ),
-                  ],
-                );
-              },
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Consumer<HomeProvider>(
+                  builder: (context, provider, child) {
+                    return Row(
+                      children: [
+                        _buildFilterChip(
+                          "Yearly",
+                          provider.selectedLiquidityDuration == 'yearly',
+                          onTap: () => _changeLiquidityDuration('yearly'),
+                        ),
+                        _buildFilterChip(
+                          "Month",
+                          provider.selectedLiquidityDuration == 'monthly',
+                          onTap: () => _changeLiquidityDuration('monthly'),
+                        ),
+                        _buildFilterChip(
+                          "Weekly",
+                          provider.selectedLiquidityDuration == 'weekly',
+                          onTap: () => _changeLiquidityDuration('weekly'),
+                        ),
+                        _buildFilterChip(
+                          "Today",
+                          provider.selectedLiquidityDuration == 'today',
+                          onTap: () => _changeLiquidityDuration('today'),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
             ),
           ],
         ),
@@ -751,14 +1003,20 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
             children: [
               Consumer<HomeProvider>(
                 builder: (context, provider, child) {
-                  return SizedBox(height: 180, child: _buildChart(provider));
+                  return SizedBox(
+                    height: 180,
+                    width: double.infinity,
+                    child: _buildChart(provider),
+                  );
                 },
               ),
 
               const SizedBox(height: 16),
 
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+              Wrap(
+                alignment: WrapAlignment.center,
+                spacing: 24,
+                runSpacing: 8,
                 children: [
                   _StatisticsChartLegend(
                     color: Colors.blue,
@@ -770,9 +1028,6 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
                       });
                     },
                   ),
-
-                  const SizedBox(width: 24),
-
                   _StatisticsChartLegend(
                     color: Colors.orange,
                     label: "Udhaar",
@@ -783,9 +1038,6 @@ class _StatisticsLiquidityChartState extends State<StatisticsLiquidityChart> {
                       });
                     },
                   ),
-
-                  const SizedBox(width: 24),
-
                   _StatisticsChartLegend(
                     color: Colors.teal,
                     label: "Collection",

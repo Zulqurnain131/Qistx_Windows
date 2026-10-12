@@ -47,4 +47,66 @@ class Statisticscontroller {
       throw Exception('Failed to fetch top debtors: $e');
     }
   }
+
+  /// All Overdue Accounts
+  Future<List<dynamic>> getOverdueAccounts(String shopId) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_all_overdue_accounts',
+        params: {'p_shop_id': shopId},
+      );
+
+      return List<dynamic>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch overdue accounts: $e');
+    }
+  }
+
+  /// Statistics Screen - Dead Stock
+  Future<List<dynamic>> getDeadStock(String shopId) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_dead_stock',
+        params: {'p_shop_id': shopId},
+      );
+
+      return List<dynamic>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch dead stock: $e');
+    }
+  }
+
+  /// Statistics Screen - Top 5 Selling Products
+  Future<List<dynamic>> getTopSellingProducts(
+    String shopId,
+    String duration,
+  ) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_top_products',
+        params: {'p_shop_id': shopId, 'p_duration': duration},
+      );
+
+      return List<dynamic>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch top selling products: $e');
+    }
+  }
+
+  /// Statistics Screen - Product Profit Margin Analysis
+  Future<List<dynamic>> getProductProfitMargins(
+    String shopId,
+    String duration,
+  ) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_gross_margin_breakdown',
+        params: {'p_shop_id': shopId, 'p_duration': duration},
+      );
+
+      return List<dynamic>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch product profit margins: $e');
+    }
+  }
 }

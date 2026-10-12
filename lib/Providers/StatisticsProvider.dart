@@ -77,4 +77,94 @@ class Statisticsprovider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  /// All Overdue Accounts
+  List<dynamic> overdueAccounts = [];
+  bool isOverdueAccountsLoading = false;
+  String? overdueAccountsError;
+
+  Future<void> loadOverdueAccounts(String shopId) async {
+    isOverdueAccountsLoading = true;
+    overdueAccountsError = null;
+    notifyListeners();
+
+    try {
+      overdueAccounts = await _controller.getOverdueAccounts(shopId);
+    } catch (e) {
+      overdueAccountsError = e.toString();
+    } finally {
+      isOverdueAccountsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Dead Stock
+  List<dynamic> deadStock = [];
+  bool isDeadStockLoading = false;
+  String? deadStockError;
+
+  Future<void> loadDeadStock(String shopId) async {
+    isDeadStockLoading = true;
+    deadStockError = null;
+    notifyListeners();
+
+    try {
+      deadStock = await _controller.getDeadStock(shopId);
+    } catch (e) {
+      deadStockError = e.toString();
+    } finally {
+      isDeadStockLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Top 5 Selling Products
+  List<dynamic> topSellingProducts = [];
+  bool isTopSellingProductsLoading = false;
+  String? topSellingProductsError;
+  String selectedTopProductsDuration = 'yearly';
+
+  Future<void> loadTopSellingProducts(String shopId, String duration) async {
+    selectedTopProductsDuration = duration;
+    isTopSellingProductsLoading = true;
+    topSellingProductsError = null;
+    notifyListeners();
+
+    try {
+      topSellingProducts = await _controller.getTopSellingProducts(
+        shopId,
+        duration,
+      );
+    } catch (e) {
+      topSellingProductsError = e.toString();
+    } finally {
+      isTopSellingProductsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Product Profit Margin Analysis
+  List<dynamic> productProfitMargins = [];
+  bool isProductProfitMarginsLoading = false;
+  String? productProfitMarginsError;
+  String selectedProfitMarginDuration = 'yearly';
+
+  Future<void> loadProductProfitMargins(String shopId, String duration) async {
+    selectedProfitMarginDuration = duration;
+    isProductProfitMarginsLoading = true;
+    productProfitMarginsError = null;
+    notifyListeners();
+
+    try {
+      productProfitMargins = await _controller.getProductProfitMargins(
+        shopId,
+        duration,
+      );
+    } catch (e) {
+      productProfitMarginsError = e.toString();
+    } finally {
+      isProductProfitMarginsLoading = false;
+      notifyListeners();
+    }
+  }
 }

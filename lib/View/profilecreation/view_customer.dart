@@ -115,7 +115,7 @@ class _ViewCustomerState extends State<ViewCustomer> {
                           opacity: 0.85,
                           child: Image.asset(
                             "assets/images/auth_confirmation_pin.png",
-                            width: screenWidth * 0.32,
+                            width: 400,
                             fit: BoxFit.contain,
                           ),
                         ),

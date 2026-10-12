@@ -31,7 +31,7 @@ class Statisticsreportcard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Title & Filters Row
+        // Title & Horizontally Scrollable Filters Row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -39,43 +39,52 @@ class Statisticsreportcard extends StatelessWidget {
               title,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            if (filters != null && onFilterChanged != null)
-              Row(
-                children: filters!.map((filter) {
-                  bool isSelected = selectedFilter == filter;
-                  return GestureDetector(
-                    onTap: () => onFilterChanged!(filter),
-                    child: Container(
-                      margin: const EdgeInsets.only(left: 4),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? const Color(0xFFFF5722)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFFFF5722)
-                              : Colors.grey.shade300,
+            if (filters != null && onFilterChanged != null) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  physics: const BouncingScrollPhysics(),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: filters!.map((filter) {
+                      bool isSelected = selectedFilter == filter;
+                      return GestureDetector(
+                        onTap: () => onFilterChanged!(filter),
+                        child: Container(
+                          margin: const EdgeInsets.only(left: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? const Color(0xFFFF5722)
+                                : Colors.transparent,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: isSelected
+                                  ? const Color(0xFFFF5722)
+                                  : Colors.grey.shade300,
+                            ),
+                          ),
+                          child: Text(
+                            filter,
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: isSelected
+                                  ? Colors.white
+                                  : Colors.grey.shade600,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
                         ),
-                      ),
-                      child: Text(
-                        filter,
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: isSelected
-                              ? Colors.white
-                              : Colors.grey.shade600,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ),
-                  );
-                }).toList(),
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
+            ],
           ],
         ),
 
@@ -107,7 +116,7 @@ class Statisticsreportcard extends StatelessWidget {
                     ),
                   ),
                   Expanded(
-                    flex: header3 != null ? 1 : 1,
+                    flex: 1,
                     child: Text(
                       header2,
                       textAlign: header3 != null

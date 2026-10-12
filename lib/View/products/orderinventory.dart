@@ -1202,7 +1202,8 @@ class _OrderinventoryState extends State<Orderinventory> {
                         opacity: 0.85,
                         child: Image.asset(
                           "assets/images/auth_confirmation_pin.png",
-                          width: screenWidth * 0.32,
+                          // width: screenWidth * 0.32,
+                          width: 400,
                           fit: BoxFit.contain,
                         ),
                       ),

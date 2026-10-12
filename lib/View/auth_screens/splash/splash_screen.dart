@@ -183,7 +183,7 @@ class _SplashScreenState extends State<SplashScreen> {
       backgroundColor: Colors.white,
       body: Center(
         child: Image.asset(
-          'assets/icons/Qist_Logo_trans.png',
+          'assets/Icons/Qist_Logo_trans.png',
           width: logoSize,
           height: logoSize,
           fit: BoxFit.contain,

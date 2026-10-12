@@ -282,19 +282,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     Positioned(
                       bottom: 0,
                       right: 0,
-                      child: Image.asset(
-                        'assets/images/auth_confirmation_pin.png',
-                        width: 350,
-                        fit: BoxFit.contain,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Opacity(
-                            opacity: 0.15,
-                            child: CustomPaint(
-                              size: const Size(300, 180),
-                              painter: _WavePainter(),
-                            ),
-                          );
-                        },
+                      child: Opacity(
+                        opacity: 0.85,
+                        child: Image.asset(
+                          'assets/images/auth_confirmation_pin.png',
+                          width: 400,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Opacity(
+                              opacity: 0.15,
+                              child: CustomPaint(
+                                size: const Size(300, 180),
+                                painter: _WavePainter(),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
 
@@ -1413,9 +1416,9 @@ class _HomeScreenState extends State<HomeScreen> {
             label: 'Inventory',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.settings_outlined),
-            activeIcon: Icon(Icons.settings),
-            label: 'Settings',
+            icon: Icon(Icons.analytics),
+            activeIcon: Icon(Icons.analytics),
+            label: 'Stats',
           ),
         ],
       ),

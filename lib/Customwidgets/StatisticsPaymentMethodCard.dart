@@ -23,21 +23,27 @@ class Statisticspaymentmethodcard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Header & Filters Row
+        // Header Row with Title and Horizontally Scrollable Chips
         Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               title,
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            Row(
-              children: [
-                _buildFilterChip("Yearly", selectedDuration == 'yearly'),
-                _buildFilterChip("Month", selectedDuration == 'month'),
-                _buildFilterChip("Weekly", selectedDuration == 'weekly'),
-                _buildFilterChip("Today", selectedDuration == 'today'),
-              ],
+            const SizedBox(width: 8),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  children: [
+                    _buildFilterChip("Yearly", selectedDuration == 'yearly'),
+                    _buildFilterChip("Month", selectedDuration == 'month'),
+                    _buildFilterChip("Weekly", selectedDuration == 'weekly'),
+                    _buildFilterChip("Today", selectedDuration == 'today'),
+                  ],
+                ),
+              ),
             ),
           ],
         ),
@@ -121,12 +127,15 @@ class Statisticspaymentmethodcard extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(width: 8),
-                          Text(
-                            item.label,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black87,
+                          Expanded(
+                            child: Text(
+                              item.label,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
                             ),
                           ),
                         ],
