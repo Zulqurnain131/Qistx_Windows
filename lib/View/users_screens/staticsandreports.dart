@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:qistx_app/Controllers/Customer_Controller.dart';
 import 'package:qistx_app/Customwidgets/statisticsordertablecard.dart';
@@ -17,6 +18,46 @@ class Staticsandreports extends StatefulWidget {
 
 class _StaticsandreportsState extends State<Staticsandreports> {
   final CustomerController _customerController = CustomerController();
+  final TextEditingController _ordersSearchController = TextEditingController();
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  String _formatDate(DateTime? date) {
+    if (date == null) return '';
+    return DateFormat('dd / MM / yyyy').format(date);
+  }
+
+  Future<void> _pickFromDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _fromDate ?? _toDate ?? DateTime.now(),
+      firstDate: DateTime(2000),
+      lastDate: _toDate ?? DateTime(2100),
+      helpText: 'Select From Date',
+    );
+
+    if (picked != null) {
+      setState(() {
+        _fromDate = picked;
+      });
+    }
+  }
+
+  Future<void> _pickToDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: _toDate ?? _fromDate ?? DateTime.now(),
+      firstDate: _fromDate ?? DateTime(2000),
+      lastDate: DateTime(2100),
+      helpText: 'Select To Date',
+    );
+
+    if (picked != null) {
+      setState(() {
+        _toDate = picked;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +77,15 @@ class _StaticsandreportsState extends State<Staticsandreports> {
         provider.loadDeadStock(shopId),
         provider.loadTopSellingProducts(shopId, 'yearly'),
         provider.loadProductProfitMargins(shopId, 'yearly'),
+        provider.loadShopOrders(shopId),
       ]);
     });
+  }
+
+  @override
+  void dispose() {
+    _ordersSearchController.dispose();
+    super.dispose();
   }
 
   String selectedPaymentDuration = 'yearly';
@@ -351,12 +399,14 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                                         item['method']?.toString() ?? '';
                                     final percentage =
                                         (item['percentage'] as num?)
-                                            ?.toStringAsFixed(1) ??
-                                        '0';
+                                            ?.toDouble() ??
+                                        0.0;
 
                                     return PaymentLegendItem(
                                       color: _getPaymentColor(method),
-                                      label: "$method ($percentage%)",
+                                      label:
+                                          "$method (${percentage.toStringAsFixed(1)}%)",
+                                      percentage: percentage,
                                     );
                                   }).toList(),
                                 );
@@ -416,16 +466,18 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                                   duration,
                                 );
                               },
+
                               items: paymentData.map<PaymentLegendItem>((item) {
                                 final method = item['method']?.toString() ?? '';
                                 final percentage =
-                                    (item['percentage'] as num?)
-                                        ?.toStringAsFixed(1) ??
-                                    '0';
+                                    (item['percentage'] as num?)?.toDouble() ??
+                                    0.0;
 
                                 return PaymentLegendItem(
                                   color: _getPaymentColor(method),
-                                  label: "$method ($percentage%)",
+                                  label:
+                                      "$method (${percentage.toStringAsFixed(1)}%)",
+                                  percentage: percentage,
                                 );
                               }).toList(),
                             );
@@ -769,38 +821,168 @@ class _StaticsandreportsState extends State<Staticsandreports> {
                       ? 22
                       : 30,
                 ),
-                StatisticsOrderTableCard(
-                  title: "All Orders",
-                  searchController: TextEditingController(),
-                  onSearchPressed: () {
-                    // Search logic
+                Consumer<Statisticsprovider>(
+                  builder: (context, provider, child) {
+                    // Sirf orders table loading ke waqt loader
+                    if (provider.isShopOrdersLoading) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Orders load karte waqt error
+                    if (provider.shopOrdersError != null) {
+                      return Center(
+                        child: Text(
+                          provider.shopOrdersError!,
+                          style: const TextStyle(color: Colors.red),
+                        ),
+                      );
+                    }
+
+                    // API se aane wale orders ko OrderItem mein convert karein
+                    final orderItems = provider.shopOrders.map((order) {
+                      final createdAt = order['date'] == null
+                          ? null
+                          : DateTime.tryParse(order['date'].toString());
+
+                      return OrderItem(
+                        orderId: order['order_id']?.toString() ?? '',
+                        orderInternalId:
+                            order['order_internal_id']?.toString() ?? '',
+
+                        date: createdAt == null
+                            ? ''
+                            : DateFormat('MMM dd, yyyy').format(createdAt),
+                        customerName:
+                            order['customer_name']?.toString() ??
+                            'Walk-in Customer',
+                        itemsCount: '${order['items_count'] ?? 0} items',
+                        totalAmount: (order['total_pkr'] ?? 0).toString(),
+                        paymentVia: order['payment_via']?.toString() ?? '',
+                      );
+                    }).toList();
+
+                    return StatisticsOrderTableCard(
+                      title: "All Orders",
+                      searchController: _ordersSearchController,
+
+                      onSearchPressed: () {},
+
+                      fromselectedDate: _formatDate(_fromDate).isEmpty
+                          ? "Select From Date"
+                          : _formatDate(_fromDate),
+
+                      toselectedDate: _formatDate(_toDate).isEmpty
+                          ? "Select To Date"
+                          : _formatDate(_toDate),
+
+                      onFromDateTap: _pickFromDate,
+                      onToDateTap: _pickToDate,
+
+                      selectedPaymentFilter: "Payment via",
+                      onPaymentFilterTap: () {},
+
+                      currentPage: provider.currentOrdersPage,
+                      totalPages: provider.totalOrdersPages,
+
+                      onPageChanged: (page) async {
+                        final shopId = await _customerController
+                            .getCurrentShopId();
+
+                        if (!mounted || shopId == null) return;
+
+                        await context.read<Statisticsprovider>().loadShopOrders(
+                          shopId,
+                          page: page,
+                        );
+                      },
+
+                      onOrderTap: (orderInternalId) {
+                        final statsProvider = context
+                            .read<Statisticsprovider>();
+
+                        // Pehle popup open karo
+                        showDialog(
+                          context: context,
+                          builder: (dialogContext) {
+                            return Consumer<Statisticsprovider>(
+                              builder: (context, provider, child) {
+                                if (provider.isOrderDetailsLoading) {
+                                  return const AlertDialog(
+                                    title: Text('Order Details'),
+                                    content: SizedBox(
+                                      height: 80,
+                                      child: Center(
+                                        child: CircularProgressIndicator(),
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                if (provider.orderDetailsError != null) {
+                                  return AlertDialog(
+                                    title: const Text('Order Details'),
+                                    content: Text(provider.orderDetailsError!),
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () =>
+                                            Navigator.pop(dialogContext),
+                                        child: const Text('Close'),
+                                      ),
+                                    ],
+                                  );
+                                }
+
+                                return AlertDialog(
+                                  title: Text('Order #$orderInternalId'),
+                                  content: SizedBox(
+                                    width: 450,
+                                    child: provider.orderDetails.isEmpty
+                                        ? const Text('No order details found.')
+                                        : ListView.builder(
+                                            shrinkWrap: true,
+                                            itemCount:
+                                                provider.orderDetails.length,
+                                            itemBuilder: (context, index) {
+                                              final item =
+                                                  provider.orderDetails[index];
+
+                                              return ListTile(
+                                                title: Text(
+                                                  item['product_name']
+                                                          ?.toString() ??
+                                                      '',
+                                                ),
+                                                subtitle: Text(
+                                                  'Quantity: ${item['quantity'] ?? 0}\n'
+                                                  'Price: ${item['unit_price'] ?? 0}',
+                                                ),
+                                                trailing: Text(
+                                                  'Rs. ${item['line_total'] ?? 0}',
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                  actions: [
+                                    TextButton(
+                                      onPressed: () =>
+                                          Navigator.pop(dialogContext),
+                                      child: const Text('Close'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          },
+                        );
+
+                        // Popup khulne ke baad details load karo
+                        statsProvider.loadOrderDetails(orderInternalId);
+                      },
+
+                      items: orderItems,
+                    );
                   },
-                  selectedDate: "19 / 2 / 2026",
-                  onDateTap: () {},
-                  selectedPaymentFilter: "Payment via",
-                  onPaymentFilterTap: () {},
-                  currentPage: 1,
-                  totalPages: 7,
-                  onPageChanged: (page) {},
-                  items: [
-                    OrderItem(
-                      orderId: "#260928-C87CC252",
-                      date: "Sep 23, 2026",
-                      customerName: "Walk-in Customer",
-                      itemsCount: "8 items",
-                      totalAmount: "2,000",
-                      paymentVia: "Cash",
-                    ),
-                    OrderItem(
-                      orderId: "#260928-C87CC252",
-                      date: "Sep 23, 2026",
-                      customerName: "Walk-in Customer",
-                      itemsCount: "8 items",
-                      totalAmount: "2,000",
-                      paymentVia: "Cash",
-                    ),
-                    // Mazeed items yahan add kar sakte hain...
-                  ],
                 ),
 
                 // Yahan aap mazeed sections add kar sakte hain

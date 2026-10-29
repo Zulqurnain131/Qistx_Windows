@@ -109,4 +109,42 @@ class Statisticscontroller {
       throw Exception('Failed to fetch product profit margins: $e');
     }
   }
+
+  /// Statistics Screen - get_shop_orders_paginated
+  Future<Map<String, dynamic>> getShopOrdersPaginated({
+    required String shopId,
+    int limit = 10,
+    int offset = 0,
+  }) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_shop_orders_paginated',
+        params: {'p_shop_id': shopId, 'p_limit': limit, 'p_offset': offset},
+      );
+
+      final rows = List<Map<String, dynamic>>.from(response);
+
+      final totalCount = rows.isNotEmpty
+          ? (rows.first['total_count'] as num).toInt()
+          : 0;
+
+      return {'orders': rows, 'totalCount': totalCount};
+    } catch (e) {
+      throw Exception('Failed to fetch shop orders: $e');
+    }
+  }
+
+  /// Statistics Screen - Get Order Details
+  Future<List<Map<String, dynamic>>> getOrderDetails(String orderId) async {
+    try {
+      final response = await _supabase.rpc(
+        'get_order_details',
+        params: {'p_order_id': orderId},
+      );
+      print("Order Details Response:$response");
+      return List<Map<String, dynamic>>.from(response);
+    } catch (e) {
+      throw Exception('Failed to fetch order details: $e');
+    }
+  }
 }

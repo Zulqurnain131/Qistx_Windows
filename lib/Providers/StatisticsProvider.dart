@@ -29,6 +29,19 @@ class Statisticsprovider extends ChangeNotifier {
   bool isPaymentMethodLoading = false;
   String? paymentMethodError;
   String selectedPaymentDuration = 'yearly';
+  List<Map<String, dynamic>> shopOrders = [];
+  bool isShopOrdersLoading = false;
+  String? shopOrdersError;
+
+  int currentOrdersPage = 1;
+  final int ordersPageSize = 10;
+  int totalOrders = 0;
+  int get totalOrdersPages =>
+      totalOrders == 0 ? 1 : (totalOrders / ordersPageSize).ceil();
+  // Statistics Screen - Order Details
+  List<Map<String, dynamic>> orderDetails = [];
+  bool isOrderDetailsLoading = false;
+  String? orderDetailsError;
 
   void setPaymentDuration(String duration) {
     selectedPaymentDuration = duration;
@@ -164,6 +177,53 @@ class Statisticsprovider extends ChangeNotifier {
       productProfitMarginsError = e.toString();
     } finally {
       isProductProfitMarginsLoading = false;
+      notifyListeners();
+    }
+  }
+
+  //Statistics Screen Orders Details
+  Future<void> loadShopOrders(String shopId, {int? page}) async {
+    if (page != null) {
+      currentOrdersPage = page;
+    }
+
+    isShopOrdersLoading = true;
+    shopOrdersError = null;
+    notifyListeners();
+
+    try {
+      final offset = (currentOrdersPage - 1) * ordersPageSize;
+
+      final result = await _controller.getShopOrdersPaginated(
+        shopId: shopId,
+        limit: ordersPageSize,
+        offset: offset,
+      );
+
+      shopOrders = List<Map<String, dynamic>>.from(result['orders']);
+      totalOrders = result['totalCount'] as int;
+    } catch (e) {
+      shopOrdersError = e.toString();
+    } finally {
+      isShopOrdersLoading = false;
+      notifyListeners();
+    }
+  }
+
+  /// Statistics Screen - Load Selected Order Details
+  Future<void> loadOrderDetails(String orderId) async {
+    isOrderDetailsLoading = true;
+    orderDetailsError = null;
+    orderDetails = [];
+
+    notifyListeners();
+
+    try {
+      orderDetails = await _controller.getOrderDetails(orderId);
+    } catch (e) {
+      orderDetailsError = e.toString();
+    } finally {
+      isOrderDetailsLoading = false;
       notifyListeners();
     }
   }

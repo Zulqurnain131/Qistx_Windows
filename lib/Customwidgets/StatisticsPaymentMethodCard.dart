@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 class Statisticspaymentmethodcard extends StatelessWidget {
@@ -62,45 +64,43 @@ class Statisticspaymentmethodcard extends StatelessWidget {
           child: Row(
             children: [
               // Left Side: Donut / Circular Chart with Center Text
+
               Expanded(
                 flex: 3,
                 child: Center(
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      const SizedBox(
-                        width: 120,
-                        height: 120,
-                        child: CircularProgressIndicator(
-                          value: 1.0,
-                          strokeWidth: 16,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            Color(0xFFFF5722),
-                          ),
+                  child: SizedBox(
+                    width: 140,
+                    height: 140,
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        CustomPaint(
+                          size: const Size(140, 140),
+                          painter: PaymentDonutPainter(items: items),
                         ),
-                      ),
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            totalCount,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              totalCount,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
-                          ),
-                          Text(
-                            centerSubText,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 11,
-                              color: Colors.black87,
+                            Text(
+                              centerSubText,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                color: Colors.black87,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ],
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -181,6 +181,68 @@ class Statisticspaymentmethodcard extends StatelessWidget {
 class PaymentLegendItem {
   final Color color;
   final String label;
+  final double percentage;
 
-  PaymentLegendItem({required this.color, required this.label});
+  PaymentLegendItem({
+    required this.color,
+    required this.label,
+    required this.percentage,
+  });
+}
+
+class PaymentDonutPainter extends CustomPainter {
+  final List<PaymentLegendItem> items;
+
+  PaymentDonutPainter({required this.items});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = math.min(size.width, size.height) / 2;
+    const strokeWidth = 16.0;
+
+    final totalPercentage = items.fold<double>(
+      0,
+      (sum, item) => sum + item.percentage,
+    );
+
+    // Background ring
+    final backgroundPaint = Paint()
+      ..color = const Color(0xFFFFEDE3)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = strokeWidth;
+
+    canvas.drawCircle(center, radius - strokeWidth / 2, backgroundPaint);
+
+    if (totalPercentage <= 0) return;
+
+    double startAngle = -math.pi / 2;
+
+    for (final item in items) {
+      if (item.percentage <= 0) continue;
+
+      final sweepAngle = (item.percentage / totalPercentage) * 2 * math.pi;
+
+      final paint = Paint()
+        ..color = item.color
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = strokeWidth
+        ..strokeCap = StrokeCap.butt;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius - strokeWidth / 2),
+        startAngle,
+        sweepAngle,
+        false,
+        paint,
+      );
+
+      startAngle += sweepAngle;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant PaymentDonutPainter oldDelegate) {
+    return oldDelegate.items != items;
+  }
 }

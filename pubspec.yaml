@@ -55,6 +55,7 @@ dependencies:
   flutter_map_dragmarker: ^8.0.0 #marker ko drag krny wali dependenci
   provider: ^6.1.5+1
   window_manager: ^0.5.2
+  intl: ^0.20.3
 
 dev_dependencies:
   flutter_test:

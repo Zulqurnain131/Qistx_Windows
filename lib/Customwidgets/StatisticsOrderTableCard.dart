@@ -4,10 +4,13 @@ class StatisticsOrderTableCard extends StatelessWidget {
   final String title;
   final TextEditingController? searchController;
   final VoidCallback? onSearchPressed;
-  final String? selectedDate;
-  final VoidCallback? onDateTap;
+  final String? toselectedDate;
+  final String? fromselectedDate;
+  final VoidCallback? onFromDateTap;
+  final VoidCallback? onToDateTap;
   final String? selectedPaymentFilter;
   final VoidCallback? onPaymentFilterTap;
+  final Function(String orderId)? onOrderTap;
 
   // Table Data
   final List<OrderItem> items;
@@ -20,10 +23,13 @@ class StatisticsOrderTableCard extends StatelessWidget {
   const StatisticsOrderTableCard({
     super.key,
     required this.title,
+    this.onOrderTap,
     this.searchController,
     this.onSearchPressed,
-    this.selectedDate,
-    this.onDateTap,
+    this.toselectedDate,
+    this.fromselectedDate,
+    this.onFromDateTap,
+    this.onToDateTap,
     this.selectedPaymentFilter,
     this.onPaymentFilterTap,
     required this.items,
@@ -134,8 +140,8 @@ class StatisticsOrderTableCard extends StatelessWidget {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFF5722),
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 24,
-                        vertical: 14,
+                        horizontal: 30,
+                        vertical: 20,
                       ),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
@@ -151,7 +157,7 @@ class StatisticsOrderTableCard extends StatelessWidget {
                   ),
                   const Spacer(),
                   InkWell(
-                    onTap: onDateTap,
+                    onTap: onFromDateTap,
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 16,
@@ -162,7 +168,28 @@ class StatisticsOrderTableCard extends StatelessWidget {
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
-                        selectedDate ?? "19 / 2 / 2026",
+                        fromselectedDate ?? "Select From Date",
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: 20),
+                  InkWell(
+                    onTap: onToDateTap,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFF5722),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        toselectedDate ?? "Select To Date",
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -216,94 +243,98 @@ class StatisticsOrderTableCard extends StatelessWidget {
                     const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final item = items[index];
-                  return Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: const Color(0xFFFF5722),
-                        width: 1.0,
+                  return InkWell(
+                    onTap: () => onOrderTap?.call(item.orderInternalId),
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: const Color(0xFFFF5722),
+                          width: 1.0,
+                        ),
                       ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Row(
-                              children: [
-                                const Text(
-                                  "Order ID: ",
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black87,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Row(
+                                children: [
+                                  const Text(
+                                    "Order ID: ",
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black87,
+                                    ),
                                   ),
-                                ),
-                                Text(
-                                  item.orderId,
-                                  style: const TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFFFF5722),
+                                  Text(
+                                    item.orderId,
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Color(0xFFFF5722),
+                                    ),
                                   ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                item.date,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade700,
                                 ),
-                              ],
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              item.date,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
                               ),
-                            ),
-                            Text(
-                              item.customerName,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
+                              Text(
+                                item.customerName,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
-                            ),
-                            Text(
-                              item.itemsCount,
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade700,
+                              Text(
+                                item.itemsCount,
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade700,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Payment via: ${item.paymentVia}",
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: Colors.grey.shade800,
-                                fontWeight: FontWeight.w500,
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Payment via: ${item.paymentVia}",
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: Colors.grey.shade800,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "${item.totalAmount} PKR",
-                              style: const TextStyle(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+                              Text(
+                                "${item.totalAmount} PKR",
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      ],
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },
@@ -404,74 +435,77 @@ class StatisticsOrderTableCard extends StatelessWidget {
                           const SizedBox(height: 16),
                       itemBuilder: (context, index) {
                         final item = items[index];
-                        return Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                item.orderId,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color(0xFFFF5722),
+                        return InkWell(
+                          onTap: () => onOrderTap?.call(item.orderInternalId),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  item.orderId,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFFFF5722),
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                item.date,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade800,
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  item.date,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 2,
-                              child: Text(
-                                item.customerName,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade800,
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  item.customerName,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                item.itemsCount,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade800,
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  item.itemsCount,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                item.totalAmount,
-                                textAlign: TextAlign.right,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  item.totalAmount,
+                                  textAlign: TextAlign.right,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black87,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Expanded(
-                              flex: 1,
-                              child: Text(
-                                item.paymentVia,
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  color: Colors.grey.shade800,
+                              Expanded(
+                                flex: 1,
+                                child: Text(
+                                  item.paymentVia,
+                                  textAlign: TextAlign.right,
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    color: Colors.grey.shade800,
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         );
                       },
                     ),
@@ -483,22 +517,47 @@ class StatisticsOrderTableCard extends StatelessWidget {
             const SizedBox(height: 20),
 
             // Horizontally Scrollable Pagination Footer Row for Mobile
-            SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              physics: const BouncingScrollPhysics(),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _buildPaginationButton("Previous", false, () {}),
-                  const SizedBox(width: 8),
-                  _buildPageNumber("1", true),
-                  _buildPageNumber("2", false),
-                  _buildPageNumber("3", false),
-                  _buildPageNumber("...", false),
-                  _buildPageNumber("7", false),
-                  const SizedBox(width: 8),
-                  _buildPaginationButton("Next", false, () {}),
-                ],
+            // Pagination Footer
+            Center(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: const BouncingScrollPhysics(),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Previous Button
+                    _buildPaginationButton("Previous", currentPage <= 1, () {
+                      if (currentPage > 1) {
+                        onPageChanged(currentPage - 1);
+                      }
+                    }),
+
+                    const SizedBox(width: 16),
+
+                    // Current Page
+                    Text(
+                      'Page $currentPage of $totalPages',
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.black87,
+                      ),
+                    ),
+
+                    const SizedBox(width: 16),
+
+                    // Next Button
+                    _buildPaginationButton(
+                      "Next",
+                      currentPage >= totalPages,
+                      () {
+                        if (currentPage < totalPages) {
+                          onPageChanged(currentPage + 1);
+                        }
+                      },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -542,31 +601,6 @@ class StatisticsOrderTableCard extends StatelessWidget {
     );
   }
 
-  Widget _buildPageNumber(String text, bool isSelected) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 4),
-      width: 32,
-      height: 32,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isSelected ? const Color(0xFFFF5722) : Colors.grey.shade300,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: isSelected ? const Color(0xFFFF5722) : Colors.black87,
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildPaginationButton(
     String text,
     bool isDisabled,
@@ -596,6 +630,7 @@ class StatisticsOrderTableCard extends StatelessWidget {
 // Model for Order Data
 class OrderItem {
   final String orderId;
+  final String orderInternalId;
   final String date;
   final String customerName;
   final String itemsCount;
@@ -604,6 +639,7 @@ class OrderItem {
 
   OrderItem({
     required this.orderId,
+    required this.orderInternalId,
     required this.date,
     required this.customerName,
     required this.itemsCount,
